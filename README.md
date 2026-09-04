@@ -21,6 +21,7 @@ DIY-Geigerzähler auf Basis eines **Wemos ESP-WROOM-02** (ESP8266) mit integrier
 4. [Gehäuse](docs/04-enclosure.md)
 5. [Zusammenbau](docs/05-assembly.md)
 6. [Selbstgebaute Hochspannungsschaltung (HV-Generator)](docs/06-hv-circuit.md) ⚠️ Sicherheitshinweise beachten
+7. [Sicherheitsregeln & Strahlungsgrundlagen (Einheiten, Grenzwerte)](docs/07-safety-and-radiation-basics.md)
 
 ## Sicherheitshinweise
 
