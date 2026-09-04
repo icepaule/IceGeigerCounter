@@ -1,5 +1,7 @@
 # Verkabelung
 
+> ⚠️ Das GM-Tube-Modul in diesem Diagramm ist mittlerweile die **selbstgebaute HV-Schaltung** aus [06-hv-circuit.md](06-hv-circuit.md) (nicht mehr das CAJOE-Fertigmodul) – Schnittstelle nach außen (5V-Versorgung rein, Pulsausgang raus) ist aber identisch geblieben, das Diagramm unten gilt unverändert. **Sicherheitshinweise in 06-hv-circuit.md vor dem Aufbau lesen.**
+
 ## Pinbelegung Wemos ESP-WROOM-02
 
 | Board-Pin | ESP8266-GPIO | Funktion im Projekt |

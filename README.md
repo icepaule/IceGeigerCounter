@@ -20,8 +20,9 @@ DIY-Geigerzähler auf Basis eines **Wemos ESP-WROOM-02** (ESP8266) mit integrier
 3. [Firmware](docs/03-firmware.md)
 4. [Gehäuse](docs/04-enclosure.md)
 5. [Zusammenbau](docs/05-assembly.md)
+6. [Selbstgebaute Hochspannungsschaltung (HV-Generator)](docs/06-hv-circuit.md) ⚠️ Sicherheitshinweise beachten
 
 ## Sicherheitshinweise
 
-- Das GM-Tube-Modul erzeugt intern eine Hochspannung von ca. 380–500V für die Geiger-Müller-Röhre. Nicht bei angeschlossener Spannungsquelle an die Röhren-/HV-Kontakte fassen.
+- Die selbstgebaute HV-Schaltung (siehe [06-hv-circuit.md](docs/06-hv-circuit.md)) erzeugt intern ca. 400V für die Geiger-Müller-Röhre. Nicht bei angeschlossener Spannungsquelle an HV-Bauteile fassen, vor Berührung immer Spannungsquelle trennen und Speicherkondensator entladen.
 - Für den Betrieb wird keine radioaktive Prüfquelle benötigt – natürliche Hintergrundstrahlung reicht zum Testen der Funktion aus.
