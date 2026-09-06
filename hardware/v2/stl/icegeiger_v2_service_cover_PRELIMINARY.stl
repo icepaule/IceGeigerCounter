@@ -1,0 +1,86 @@
+solid service_cover_preliminary
+facet normal 0 0 -1
+outer loop
+vertex 0 0 0
+vertex 43 69 0
+vertex 43 0 0
+endloop
+endfacet
+facet normal 0 0 -1
+outer loop
+vertex 0 0 0
+vertex 0 69 0
+vertex 43 69 0
+endloop
+endfacet
+facet normal 0 0 1
+outer loop
+vertex 0 0 2.4
+vertex 43 0 2.4
+vertex 43 69 2.4
+endloop
+endfacet
+facet normal 0 0 1
+outer loop
+vertex 0 0 2.4
+vertex 43 69 2.4
+vertex 0 69 2.4
+endloop
+endfacet
+facet normal 0 -1 0
+outer loop
+vertex 0 0 0
+vertex 43 0 0
+vertex 43 0 2.4
+endloop
+endfacet
+facet normal 0 -1 0
+outer loop
+vertex 0 0 0
+vertex 43 0 2.4
+vertex 0 0 2.4
+endloop
+endfacet
+facet normal 0 1 0
+outer loop
+vertex 0 69 0
+vertex 43 69 2.4
+vertex 43 69 0
+endloop
+endfacet
+facet normal 0 1 0
+outer loop
+vertex 0 69 0
+vertex 0 69 2.4
+vertex 43 69 2.4
+endloop
+endfacet
+facet normal -1 0 0
+outer loop
+vertex 0 0 0
+vertex 0 0 2.4
+vertex 0 69 2.4
+endloop
+endfacet
+facet normal -1 0 0
+outer loop
+vertex 0 0 0
+vertex 0 69 2.4
+vertex 0 69 0
+endloop
+endfacet
+facet normal 1 0 0
+outer loop
+vertex 43 0 0
+vertex 43 69 0
+vertex 43 69 2.4
+endloop
+endfacet
+facet normal 1 0 0
+outer loop
+vertex 43 0 0
+vertex 43 69 2.4
+vertex 43 0 2.4
+endloop
+endfacet
+endsolid service_cover_preliminary

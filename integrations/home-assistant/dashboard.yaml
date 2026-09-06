@@ -1,0 +1,12 @@
+type: vertical-stack
+cards:
+  - type: entities
+    title: IceGeiger V2
+    entities:
+      - sensor.icegeiger_cpm
+      - sensor.icegeiger_usvh
+      - sensor.icegeiger_gnss_satellites
+  - type: map
+    entities:
+      - device_tracker.icegeiger_v2
+    hours_to_show: 6

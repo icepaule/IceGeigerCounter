@@ -1,0 +1,29 @@
+name: Validate and build IceGeiger V2 artifacts
+on:
+  push:
+    branches: [main]
+    paths: ['hardware/v2/**','firmware/icegeiger_v2/**','integrations/**','scripts/**','tests/**','.github/workflows/build-v2-artifacts.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  validate-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y openscad xvfb imagemagick python3-matplotlib nodejs
+      - name: Validate source and build CAD
+        run: |
+          ./scripts/validate.sh
+          python3 ./scripts/generate-diagrams.py
+          ./scripts/render-previews.sh
+      - name: Upload generated CAD artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: icegeiger-v2-cad
+          path: |
+            hardware/v2/stl/
+            docs/v2/images/

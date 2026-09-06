@@ -1,0 +1,25 @@
+# IceGeiger local secrets / runtime data
+firmware/icegeiger_v2/secrets.h
+integrations/bridge/.env
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Runtime data and logs
+*.ndjson
+*.log
+runtime/
+data/
+
+# Build / IDE
+.pio/
+.vscode/
+.idea/
+__pycache__/
+*.pyc
+.DS_Store
+
+# OpenSCAD temporary output
+*.csg
+*.echo
