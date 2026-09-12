@@ -2,10 +2,17 @@ name: Validate and build IceGeiger V2 artifacts
 on:
   push:
     branches: [main]
-    paths: ['hardware/v2/**','firmware/icegeiger_v2/**','integrations/**','scripts/**','tests/**','.github/workflows/build-v2-artifacts.yml']
+    paths:
+      - 'hardware/v2/**'
+      - 'firmware/icegeiger_v2/**'
+      - 'integrations/**'
+      - 'scripts/**'
+      - 'tests/**'
+      - 'docs/v2/**'
+      - '.github/workflows/build-v2-artifacts.yml'
   workflow_dispatch:
 permissions:
-  contents: read
+  contents: write
 jobs:
   validate-build:
     runs-on: ubuntu-latest
@@ -15,15 +22,28 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y openscad xvfb imagemagick python3-matplotlib nodejs
-      - name: Validate source and build CAD
+      - name: Validate existing project
+        run: ./scripts/validate.sh
+      - name: Build Field Case V1.2
         run: |
-          ./scripts/validate.sh
-          python3 ./scripts/generate-diagrams.py
-          ./scripts/render-previews.sh
-      - name: Upload generated CAD artifacts
+          chmod +x ./scripts/build-field-case-v12.sh ./scripts/render-field-case-v12.sh
+          ./scripts/build-field-case-v12.sh
+          ./scripts/render-field-case-v12.sh
+      - name: Commit generated Field Case artifacts
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add hardware/v2/field_case_v12/stl docs/v2/images/field_case_v12_*.png
+          if git diff --cached --quiet; then
+            echo 'Generated artifacts already current.'
+            exit 0
+          fi
+          git commit -m 'Generate Field Case V1.2 STL and previews [skip ci]'
+          git push
+      - name: Upload CAD artifact bundle
         uses: actions/upload-artifact@v4
         with:
-          name: icegeiger-v2-cad
+          name: icegeiger-v2-field-case-v12
           path: |
-            hardware/v2/stl/
-            docs/v2/images/
+            hardware/v2/field_case_v12/stl/
+            docs/v2/images/field_case_v12_*.png
