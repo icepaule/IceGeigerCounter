@@ -11,13 +11,21 @@ on:
       - 'docs/v2/**'
       - '.github/workflows/build-v2-artifacts.yml'
   workflow_dispatch:
+
+concurrency:
+  group: icegeiger-v2-cad-main
+  cancel-in-progress: true
+
 permissions:
   contents: write
+
 jobs:
   validate-build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Install dependencies
         run: |
           sudo apt-get update
@@ -36,10 +44,11 @@ jobs:
           git add hardware/v2/field_case_v12/stl docs/v2/images/field_case_v12_*.png
           if git diff --cached --quiet; then
             echo 'Generated artifacts already current.'
-            exit 0
+          else
+            git commit -m 'Generate Field Case V1.2 STL and previews [skip ci]'
+            git pull --rebase origin main
+            git push origin HEAD:main
           fi
-          git commit -m 'Generate Field Case V1.2 STL and previews [skip ci]'
-          git push
       - name: Upload CAD artifact bundle
         uses: actions/upload-artifact@v4
         with:
