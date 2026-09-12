@@ -1,67 +1,36 @@
 # V2 – Quellen und verifizierte Daten
 
-Stand der Prüfung: 2026-09-06.
+Stand: 2026-09-12.
 
-## Gekaufter Bausatz
+## GC-1602-NANO
 
-- Amazon-Kauflink: https://amzn.eu/d/0cK2H3rO
-- GC-1602-NANO Community-/Originalprojekt: https://github.com/2969773606/GeigerCounter1602nano
-- dort dokumentiert: externer Interrupt-Ausgang, Nano/1602-Aufbau und Unterstützung mehrerer GM-Röhren im typischen 330–600-V-Arbeitsbereich.
+- Amazon-Bausatz: https://amzn.eu/d/0cK2H3rO
+- Verkäuferangabe: 108 × 65 × 47 mm; Rohr 90 ±2 mm × 10 ±0,5 mm; empfohlene Arbeitsspannung 380 V
+- GC-1602-Codebeispiel: https://github.com/WinHGGG/Geiger-Counter-v1.3-LCD-CAJOE
+- CAJOE/RadiationD-Referenzprojekt: https://github.com/SensorsIot/Geiger-Counter-RadiationD-v1.1-CAJOE-
 
-## Heltec Wireless Tracker V2
+Der GC-1602-Beispielcode zählt FALLING-Flanken und verwendet `CPM/151`. IceGeiger übernimmt **nicht** blind den Faktor 151; CPM/Impulse bleiben Primärwerte, bis der tatsächlich gelieferte Röhrentyp verifiziert ist.
 
-- Produktseite: https://heltec.org/project/wireless-tracker-v2/
-- Heltec ESP32 Framework: https://github.com/HelTecAutomation/Heltec_ESP32
-- Zephyr Board-Dokumentation / Pinout: https://github.com/zephyrproject-rtos/zephyr/tree/main/boards/heltec/heltec_wireless_tracker
+Die Verkäuferangabe „maximum counting rate 25 times/minute“ wird als unplausible/unklare Übersetzungsangabe **nicht für das Design verwendet**.
 
-Verifizierte Kernpunkte:
+## Gelieferter Tracker
 
-- ESP32-S3FN8,
-- SX1262,
-- UC6580 GNSS,
-- 863–928 MHz Hardwarebereich,
-- Lithium-Akku-Management,
-- GNSS UART auf GPIO33/34,
-- Heltec stellt LoRaWAN- und GPS-Beispiele bereit.
+Auf der realen Platine steht `HITT-Tracker V1.2`; Rückseite: **SX1262** und **UC6580**. Verkäuferzeichnung: 65,84 × 28,00 mm, max. ca. 14,71 mm.
 
-## LoRaWAN EU868
+Öffentliche Heltec-V1.1-Unterlagen:
 
-- The Things Network EU863-870: https://www.thethingsnetwork.org/docs/lorawan/regional-parameters/eu868/
-- LoRa Alliance Regional Parameters: https://lora-alliance.org/resource_hub/rp2-1-0-3-lorawan-regional-parameters/
+- https://resource.heltec.cn/download/Wireless_Tracker/Wireless%20Tracker1.1.pdf
+- https://docs.heltec.org/en/node/esp32/wireless_tracker/hardware_update_log.html
 
-Wichtig:
+Dort verifiziert: ESP32-S3FN8, SX1262, UC6580, Type-C, 3,7-V-Li-Akkuinterface, IPEX LoRa/GNSS, 0,96" 80×160 TFT, GPIO33/34 GNSS-UART und GPIO3 HIGH zur GNSS-Versorgung bei V1.1.
 
-- EU863-870,
-- Default-Kanäle 868.1 / 868.3 / 868.5 MHz,
-- Duty-Cycle-/Sendeleistungsgrenzen beachten,
-- typische LoRaWAN-Max-EIRP-Vorgabe in EU868: +16 dBm; lokale/regulatorische Randbedingungen bleiben maßgeblich.
+## Stromversorgung / Logging
 
-## ChirpStack
+- Pololu S13V10F5: https://www.pololu.com/product/4083/specs
+- Joy-IT COM-MSD: https://joy-it.net/de/products/COM-MSD
+- 2×18650 Parallelhalter: https://www.jf-elektronik.de/produkt/batteriehalter-2x-18650-parallel/
+- 1S-BMS 4 A: https://funduinoshop.com/en/electronic-modules/other/voltage-regulator/lithium-battery-protection-board-charging-module-bms-1s-3.7-v-4a-for-18650-lipo-li-ion
 
-- Docker: https://github.com/chirpstack/chirpstack-docker
-- MQTT Integration: https://www.chirpstack.io/docs/chirpstack/integrations/mqtt.html
+## CAD-Referenz
 
-Standard-Uplinktopic:
-
-`application/<APPLICATION_ID>/device/<DEV_EUI>/event/up`
-
-## Home Assistant
-
-- MQTT Sensor: https://www.home-assistant.io/integrations/sensor.mqtt/
-- MQTT Device Tracker: https://www.home-assistant.io/integrations/device_tracker.mqtt/
-
-MQTT Device Tracker kann GPS-Koordinaten über JSON-Attribute mit `latitude`, `longitude` und optional `gps_accuracy` übernehmen.
-
-## Softwarebibliotheken
-
-- arduino-mqtt: https://github.com/256dpi/arduino-mqtt
-- ArduinoJson: https://arduinojson.org/
-
-## Unsicher / nach Lieferung zu verifizieren
-
-- tatsächlich geliefertes Zählrohr,
-- exakter INT-Ruhe- und Pulspegel des Amazon-Boards,
-- PCB- und Lochmaße,
-- realer Stromverbrauch,
-- Akku-Spannungsmessung des Heltec im konkreten Boardstand,
-- endgültiger CPM→µSv/h-Faktor.
+Das bereitgestellte `GC-1602-NANO_CAJOE_1.1.stl` wurde lokal nur geometrisch untersucht. Bounding box: **119,05 × 71,00 × 28,80 mm**, geschlossenes Mesh. Es wird nicht in das Repository übernommen und nicht als Quelle für exakte PCB-Bohrungen behandelt.
