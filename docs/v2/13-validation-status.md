@@ -1,31 +1,47 @@
 # V2 – Validierungsstatus
 
-Diese Datei trennt bewusst **verifiziert**, **statisch geprüft** und **noch hardwareabhängig**.
+## Real verifiziert
 
-## Verifiziert aus öffentlichen Quellen
-- [x] GC-1602-NANO besitzt externen Interrupt-Ausgang und Nano/1602-Konzept.
-- [x] Heltec Wireless Tracker V2 kombiniert ESP32-S3, SX1262 und UC6580.
-- [x] GNSS UART GPIO33/34 ist in Heltec-Beispielen belegt.
-- [x] Heltec stellt LoRaWAN/GPS-Beispiele bereit.
-- [x] ChirpStack publiziert Uplinks per MQTT.
-- [x] Home Assistant MQTT Device Tracker unterstützt GPS-Koordinaten.
+- [x] gelieferter Tracker trägt `HITT-Tracker V1.2`
+- [x] SX1262 auf realer Platine ablesbar
+- [x] UC6580 auf realer Platine ablesbar
+- [x] Tracker-Display und Werksfirmware laufen per USB
+- [x] Tracker-Hülle aus Maßzeichnung: 65,84 × 28,00 × ca. 14,71 mm
+- [x] Stiftleisten sind bereits verlötet; CAD berücksichtigt 6,1-mm-Pinunterstand
 
-## Im Repository statisch geprüft
-- [x] Firmware enthält keine produktiven Credentials; `secrets.h` ist ausgeschlossen.
-- [x] ChirpStack Codec besitzt lokalen Test.
-- [x] Bridge besitzt Payload-/Normalisierungstest und optionale InfluxDB-Anbindung.
-- [x] OpenSCAD ist library-frei und generiert die vorgesehenen Teile.
-- [x] PRELIMINARY-STLs sind vorhanden; FINAL-Geometrie ist explizit von realer Vermessung abhängig.
-- [x] Secret-Scan-Skript ist enthalten.
+## Aus Hersteller-/Projektunterlagen verifiziert
 
-## Noch nicht real geprüft
-- [ ] exakter Pegel und Pulsform des gelieferten GC-1602-INT
-- [ ] tatsächlich geliefertes Zählrohr und CPM-Faktor
-- [ ] endgültige Gehäusepassung / Loch- und Buchsenpositionen
-- [ ] microSD-SPI-Pins am konkreten Wireless Tracker V2 Boardstand
-- [ ] Gesamtstrom / Laufzeit / Ladeszenario
-- [ ] LoRaWAN-Uplink in realem ChirpStack und Reichweite
-- [ ] GNSS-Fix im endgültigen Gehäuse
+- [x] Heltec-V1.1-Familie: ESP32-S3FN8 + SX1262 + UC6580
+- [x] GPIO33/34 = GNSS UART, GPIO3 HIGH schaltet GNSS-Versorgung bei V1.1
+- [x] LoRa belegt GPIO8–14; TFT GPIO38–42
+- [x] Joy-IT COM-MSD = 3,3-V-SPI, 18 × 21 × 12 mm
+- [x] Pololu S13V10F5 = 5 V, typisch 1 A, 8,9 × 12,1 × 4,2 mm
+- [x] Parallelhalter = 76 × 40,5 × 20 mm
 
-## Freigabekriterium `FINAL`
-Erst Messliste ausfüllen, Fit-Jig erfolgreich testen, elektrische Pegel prüfen und vollständigen Inbetriebnahmeplan abarbeiten. Erst danach STL-Dateien als `FINAL` freigeben.
+## CAD / statisch geprüft
+
+- [x] neuer Field-Case-SCAD ohne externe Bibliotheken
+- [x] Base/Lid/Shelf/Beta-Cap + Test-Jigs lokal erzeugt
+- [x] lokal erzeugte STL-Meshes watertight und jeweils eine zusammenhängende Komponente
+- [x] konservative Hüllprüfung ohne Kollision
+- [x] GNSS-Patch besitzt metallfreie Keepout-Säule
+- [x] Beta-Fenster mit Membran + Schutzkappe vorgesehen
+- [x] umlaufende 2-mm-Silikondichtung und acht M3-Anpresspunkte
+
+## Noch offen bis GC-1602 geliefert ist
+
+- [ ] reale PCB-Länge/Breite
+- [ ] Lochabstände und Lochdurchmesser
+- [ ] reale Bauhöhe / LCD-Position
+- [ ] Zählrohr-Aufschrift und Rohrmittelpunkt
+- [ ] realer INT-Ruhe-/Pulspegel
+- [ ] CPM→µSv/h-Faktor
+- [ ] physischer Fit-Jig-Test
+
+## Danach
+
+- [ ] FINAL-STLs erzeugen
+- [ ] Batterie-/Lade-/Stromtest
+- [ ] GNSS-Fix im geschlossenen Gehäuse
+- [ ] LoRaWAN-Uplink / Reichweite
+- [ ] Spritzwassertest ohne Elektronik, danach mit Dummy-Gewicht
