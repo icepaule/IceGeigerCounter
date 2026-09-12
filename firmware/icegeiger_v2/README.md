@@ -1,18 +1,12 @@
-# IceGeiger V2 Firmware
+# IceGeiger V2 firmware
 
-Target: **Heltec Wireless Tracker V2** (ESP32-S3 + SX1262 + UC6580).
+Target: delivered **HITT-Tracker V1.2** (real PCB: SX1262 + UC6580) using the public Heltec Wireless-Tracker-V1.1-family pinout where it matches the hardware.
 
-## Install
+Important changes from the first V2 draft:
 
-1. Arduino IDE 2.x installieren.
-2. Heltec ESP32 Board-Support gemäß Hersteller installieren.
-3. Board `Wireless Tracker V2` und Region `EU868` auswählen.
-4. Libraries installieren: `arduino-mqtt` (256dpi), `ArduinoJson` 7.
-5. `secrets.example.h` nach `secrets.h` kopieren und lokal ausfüllen.
-6. `icegeiger_v2.ino` öffnen, kompilieren und flashen.
+- Geiger INT moved from GPIO47 to **GPIO17** because GPIO47 is documented as Boot_Mode on the Heltec family.
+- GNSS remains on RX=33 / TX=34 with GPIO3 HIGH.
+- microSD remains on GPIO4/5/6/7.
+- battery measurement is read from GPIO1 using the documented 4.9 divider factor and is included in MQTT/SD/LoRa payloads.
 
-## Important
-
-The firmware deliberately keeps the MCU awake. It must count the GC interrupt continuously and write a record every 10 seconds. The Heltec LoRaWAN timer/IRQ state machine is serviced without calling its deep-sleep helper.
-
-`battery_mv` is currently reported as `0` until the battery-ADC path has been verified on the exact delivered Wireless Tracker V2 hardware revision. This avoids publishing a fabricated voltage.
+Copy `secrets.example.h` to local `secrets.h`, fill credentials locally and never commit the file.
