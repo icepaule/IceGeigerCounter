@@ -8,40 +8,46 @@
 - [x] Tracker-Display und Werksfirmware laufen per USB
 - [x] Tracker-Hülle aus Maßzeichnung: 65,84 × 28,00 × ca. 14,71 mm
 - [x] Stiftleisten sind bereits verlötet; CAD berücksichtigt 6,1-mm-Pinunterstand
+- [x] duales Battery Shield real vorhanden
+- [x] Battery Shield real gemessen: **100,2 × 48,0 mm**
+- [x] unterseitiges Shield-Bauteil mit ca. **5 mm** Höhe in CAD berücksichtigt
 
-## Aus Hersteller-/Projektunterlagen verifiziert
+## Aus Hersteller-/Projektunterlagen plausibilisiert
 
 - [x] Heltec-V1.1-Familie: ESP32-S3FN8 + SX1262 + UC6580
 - [x] GPIO33/34 = GNSS UART, GPIO3 HIGH schaltet GNSS-Versorgung bei V1.1
 - [x] LoRa belegt GPIO8–14; TFT GPIO38–42
-- [x] Joy-IT COM-MSD = 3,3-V-SPI, 18 × 21 × 12 mm
-- [x] Pololu S13V10F5 = 5 V, typisch 1 A, 8,9 × 12,1 × 4,2 mm
-- [x] Parallelhalter = 76 × 40,5 × 20 mm
+- [x] duale Shield-Familie DFR0969/OKY3604-2-artig besitzt typischerweise 5-V-Ausgang, Lade-/Schutzschaltung und HOLD/NORMAL
 
-## CAD / statisch geprüft
+## CAD / statisch geprüft – Field Case v1.4
 
-- [x] neuer Field-Case-SCAD ohne externe Bibliotheken
-- [x] Base/Lid/Shelf/Beta-Cap + Test-Jigs lokal erzeugt
-- [x] lokal erzeugte STL-Meshes watertight und jeweils eine zusammenhängende Komponente
-- [x] konservative Hüllprüfung ohne Kollision
-- [x] GNSS-Patch besitzt metallfreie Keepout-Säule
-- [x] Beta-Fenster mit Membran + Schutzkappe vorgesehen
+- [x] eigenständiger OpenSCAD-Entwurf ohne externe Bibliotheken
+- [x] integrierte Battery-Shield-Schienen, je 5 × 5 mm an den kurzen Enden
+- [x] 1,2 mm berechneter Freiraum unter dem 5-mm-Unterseitenbauteil
+- [x] herausnehmbare Service-Brücke für Tracker + microSD
+- [x] Tracker-Pinreihen erhalten offene Durchbrüche
+- [x] GNSS-Bereich unter der Patchantenne ist offen
+- [x] Beta-Fenster mit Membran + Schutzkappe
 - [x] umlaufende 2-mm-Silikondichtung und acht M3-Anpresspunkte
+- [x] `check_fit.py` prüft die wichtigsten statischen Freiräume
+- [x] lokale STL-Exporte waren watertight; GitHub Actions reproduziert die Repository-STLs
 
-## Noch offen bis GC-1602 geliefert ist
+## Noch physisch zu testen
 
-- [ ] reale PCB-Länge/Breite
-- [ ] Lochabstände und Lochdurchmesser
-- [ ] reale Bauhöhe / LCD-Position
+- [ ] realer Print von Base/Lid/Service-Bridge
+- [ ] reale Shield-Schraubpositionen in die massiven Schienen bohren
+- [ ] tatsächliche GC-1602 PCB-Länge/Breite
+- [ ] GC-Lochabstände und Lochdurchmesser
+- [ ] reale GC-Bauhöhe / LCD-Position
 - [ ] Zählrohr-Aufschrift und Rohrmittelpunkt
 - [ ] realer INT-Ruhe-/Pulspegel
+- [ ] Battery-Shield 5-V-Ausgang unter Last
+- [ ] Battery-Shield NORMAL/HOLD/Ruhestrom
 - [ ] CPM→µSv/h-Faktor
-- [ ] physischer Fit-Jig-Test
-
-## Danach
-
-- [ ] FINAL-STLs erzeugen
-- [ ] Batterie-/Lade-/Stromtest
 - [ ] GNSS-Fix im geschlossenen Gehäuse
 - [ ] LoRaWAN-Uplink / Reichweite
-- [ ] Spritzwassertest ohne Elektronik, danach mit Dummy-Gewicht
+- [ ] Dichtungs- und Spritzwassertest zunächst ohne Elektronik
+
+## Statusbezeichnung
+
+Field Case v1.4 ist der aktuelle **Print Candidate**. Nach erfolgreicher realer Passprobe und den elektrischen Shield-Tests kann dieser Stand als hardware-validiert markiert werden.
