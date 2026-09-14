@@ -2,42 +2,49 @@
 
 ## Referenz und aktueller V2-Stand
 
-Das ursprüngliche V1-Gehäuse orientierte sich am [Case for Cajoe Geiger Counter (Thingiverse, greygoo)](https://www.thingiverse.com/thing:5982201). Für IceGeiger V2 wird die fremde STL-Geometrie **nicht übernommen**. Stattdessen gibt es ein vollständig eigenständiges, parametrisierbares OpenSCAD-Gehäuse ohne externe Bibliotheken.
+Das ursprüngliche V1-Gehäuse orientierte sich am [Case for Cajoe Geiger Counter (Thingiverse, greygoo)](https://www.thingiverse.com/thing:5982201). Für IceGeiger V2 wird die fremde STL-Geometrie **nicht übernommen**. Das aktuelle Gehäuse ist vollständig eigenständig und parametrisch in OpenSCAD modelliert.
 
-Aktueller V2-Entwurf:
+Aktueller V2-Druckstand:
 
-- `hardware/v2/field_case_v12/icegeiger_field_case_v12.scad`
+- `hardware/v2/field_case_v14/icegeiger_field_case_v14.scad`
 - GC-1602-NANO Messkammer
 - HITT/Heltec Wireless Tracker V1.2 mit SX1262 + UC6580
-- 2× wechselbare Samsung INR18650-25R in 1S2P
-- microSD, 1S-BMS und 5-V-Regler
+- **real vermessenes duales 18650 Battery Shield, 100,2 × 48,0 mm**
+- 2× wechselbare Samsung INR18650-25R
+- microSD
 - außenliegende 868-MHz-SMA-Antenne
 - beide Displays sichtbar
 - umlaufende 2-mm-Silikon-Dichtung
 - Beta-Messfenster mit dünner Membran und abnehmbarer Schutzkappe
 
-![Field Case – assembled](v2/images/field_case_v12_assembled.png)
+![Field Case – assembled](v2/images/field_case_v14_assembled.png)
 
-![Field Case – internal layout](v2/images/field_case_v12_internal_layout.png)
+![Field Case – internal layout](v2/images/field_case_v14_internal_layout.png)
+
+## v1.4 Battery-Shield-Integration
+
+An beiden kurzen Shield-Rändern liegen im Gehäuse massive **5 × 5 mm Befestigungsschienen**. Die reale Unterseite des Shields besitzt ein bis zu ca. 5 mm hohes Bauteil; v1.4 hält dafür rechnerisch ca. **1,2 mm Freiraum zum Gehäuseboden**.
+
+Oberhalb des Shields sitzt eine herausnehmbare Service-Brücke für Tracker und microSD. Die eingelöteten Tracker-Pinreihen hängen in offene Schlitze und die GNSS-Patchantenne erhält eine offene Zone unter sich.
+
+Die alte `field_case_v12/`-Geometrie bleibt nur als Historie erhalten.
 
 ## Abmessungen und Status
 
-Der Hauptkörper ist derzeit **120 × 120 × 54 mm**, der Deckel 4,2 mm. Mit den acht außenliegenden M3-Klemmbossen ergibt sich eine maximale STL-Hüllfläche von etwa **130,4 × 130,4 mm**.
+Der CAD-Hauptkörper ist **130 × 132 × 58 mm**, der Deckel 4,2 mm. Mit den acht außenliegenden M3-Klemmbossen ergibt sich eine maximale STL-Hüllfläche von etwa **140,4 × 142,4 mm**.
 
-Der gelieferte Tracker ist mechanisch verifiziert. Für den noch ausstehenden GC-1602 werden bis zur physischen Vermessung die Amazon-Angaben **108 × 65 × 47 mm** verwendet. Das bereitgestellte Printables-STL `GC-1602-NANO_CAJOE_1.1.stl` wurde nur als Plausibilitätsreferenz analysiert (119,05 × 71,00 × 28,80 mm) und wird nicht weiterveröffentlicht.
+Der Tracker und das Battery Shield sind anhand realer Hardware bzw. realer Messwerte berücksichtigt. Beim GC-1602 wird bis zur physischen Vermessung weiterhin die Amazon-Angabe **108 × 65 × 47 mm** verwendet.
 
-Die GC-bezogenen STL-Dateien bleiben deshalb **PRELIMINARY**. Nach Lieferung werden PCB-Maße, Bohrungen, Rohrposition und LCD-Höhe eingetragen; danach folgt der FINAL-Export.
+Damit der aktuelle Druck trotzdem nicht von erfundenen GC-Bohrmaßen abhängt, sind die GC-Eckhalter als breite, ungebohrte Pads ausgeführt. Das reale Board wird trocken aufgelegt und anschließend durch sein echtes Lochbild gebohrt.
 
 ## Dichtung und Beta-Fenster
 
-Die Hauptfuge enthält eine 2,45 mm breite und 1,55 mm tiefe Nut für 2,0-mm-Silikonrundschnur (~22,5 % nominelle Kompression). Acht M3-Schrauben verteilen den Anpressdruck. Beide Displayöffnungen erhalten von innen verklebte 1-mm-Polycarbonatfenster.
+Die Hauptfuge enthält eine 2,45 mm breite und 1,55 mm tiefe Nut für 2,0-mm-Silikonrundschnur. Acht M3-Schrauben verteilen den Anpressdruck. Beide Displayöffnungen erhalten von innen verklebte 1-mm-Polycarbonatfenster.
 
-Die Zählrohrseite besitzt ein **98 × 18 mm** großes Messfenster. Innen bleibt eine dünne PET/Mylar-Membran (Startwert 25–50 µm) dauerhaft abgedichtet; außen sitzt eine starre abnehmbare PETG/ASA-Schutzkappe. Für beta-sensitive Messungen wird nur die Kappe abgenommen.
+Die Zählrohrseite besitzt ein Beta-Messfenster mit dünner PET/Mylar-Membran und abnehmbarer Schutzkappe.
 
 Das Design ist auf **Spritzwasserschutz** ausgelegt, besitzt aber keine geprüfte IP-Schutzart.
 
 ## Kollisionsprüfung
 
-`hardware/v2/field_case_v12/check_fit.py` prüft konservative Bauteilhüllen. Der aktuelle Stand ist kollisionsfrei. Wichtige Abstände: GC→Deckel 2,70 mm; Akkuhalter→Tracker-Pinspitzen 2,00 mm; Tracker→Deckel 8,19 mm; GC→Trennwand 2,00 mm; Akkuhalter→Innenwand mindestens 1,40 mm.
-
-Details: `hardware/v2/field_case_v12/FIT_REPORT.md`.
+`hardware/v2/field_case_v14/check_fit.py` prüft die wichtigsten konservativen Freiräume. Details: `hardware/v2/field_case_v14/FIT_REPORT.md`.

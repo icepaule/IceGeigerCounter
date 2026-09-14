@@ -10,19 +10,29 @@ Wenn IceGeiger nicht mobil genutzt wird, bleibt er im Schuppen eingeschaltet und
 2. LoRaWAN bleibt parallel als langsamer Heartbeat/Fallback aktiv,
 3. SD zeichnet weiter.
 
-Damit lässt sich ein WLAN-Ausfall später rekonstruieren.
-
 ## Empfohlene Montage
 
 - trocken,
 - keine direkte Sonneneinstrahlung,
 - nicht direkt an metallischer Außenwand, wenn LoRa genutzt wird,
-- GNSS-Antenne für stationären Betrieb nicht zwingend nötig, aber unter Kunststoff und möglichst mit Himmelsrichtung montieren,
+- GNSS-Antennenbereich unter Kunststoff und möglichst frei von Metall,
 - Abstand zu Schaltnetzteilen, Motoren und stark störenden Geräten.
 
-## Stromversorgung
+## Stromversorgung mit Battery Shield
 
-Für Dauerbetrieb kann das Gerät über USB/5 V gespeist werden; der Akku dient dann als mobile Energiequelle. Ob ein echtes unterbrechungsfreies Power-Path-Verhalten mit dem finalen Aufbau sicher funktioniert, wird nach Hardwaretest dokumentiert.
+Field Case v1.4 verwendet das integrierte duale 18650 Battery Shield.
+
+Vor Dauerbetrieb unbedingt messen:
+
+- 5-V-Ausgangsstabilität,
+- Ladeverhalten,
+- Ruhestrom in HOLD,
+- Abschaltschwelle in NORMAL,
+- Temperatur des Shields bei Dauerlast.
+
+Bei verbreiteten Shields dieser Familie kann NORMAL bei geringer Last automatisch abschalten. HOLD verhindert das, kann bei manchen Revisionen aber zusätzlichen Ruhestrom verursachen. Für einen Schuppensensor ist daher der **gemessene** Dauerverbrauch wichtiger als die Verkäuferangabe.
+
+Wenn der gemessene HOLD-Verbrauch zu hoch ist, sollte für den stationären Betrieb eine alternative externe 5-V-Versorgung bzw. ein eigener Low-Quiescent-Current-Power-Path verwendet werden; das Battery Shield bleibt dann primär mobile Versorgung.
 
 ## Home-Assistant-Automationen
 
@@ -36,4 +46,4 @@ Sinnvolle Sensoren:
 - SD-Status,
 - Batteriespannung nach Verifikation.
 
-Alarme nur auf technische Zustände (z. B. `keine Daten seit 10 min`) sind verlässlich. Strahlungsalarmgrenzen erst nach Kalibrierung bewusst setzen.
+Technische Alarme wie `keine Daten seit 10 min` sind belastbar. Strahlungsalarmgrenzen erst nach Kalibrierung bewusst setzen.

@@ -1,6 +1,6 @@
 # V2 – BOM / Einkaufsliste
 
-Stand: 2026-09-12. Ziel ist ein kompakter mobiler Aufbau mit GC-1602-NANO, HITT-Tracker, LoRaWAN/GNSS, Offline-Logging und zwei wechselbaren 18650-Zellen.
+Stand: 2026-09-14. Aktueller mechanischer Aufbau: **Field Case v1.4** mit integriertem dualen 18650 Battery Shield.
 
 ## Bereits vorhanden / bestellt
 
@@ -8,43 +8,45 @@ Stand: 2026-09-12. Ziel ist ein kompakter mobiler Aufbau mit GC-1602-NANO, HITT-
 |---|---|---:|---|
 | 1 | GC-1602-NANO Geiger Counter Kit inkl. Zählrohr | 1 | bestellt: https://amzn.eu/d/0cK2H3rO; Verkäufer nennt 108 × 65 × 47 mm |
 | 2 | HITT/Heltec Wireless Tracker V1.2 | 1 | vorhanden; SX1262 + UC6580; 65,84 × 28,00 × 14,71 mm |
-| 3 | Samsung INR18650-25R | 2 | vorhanden; wechselbare Zellen, 1S2P |
+| 3 | Samsung INR18650-25R | 2 | vorhanden; wechselbare 18650 |
+| 4 | Dual-18650 Battery Shield, HOLD/NORMAL | 1 | vorhanden; **real gemessen 100,2 × 48,0 mm**, unterseitiges Bauteil max. ca. 5 mm |
 
-## Noch zu beschaffen
+## Für den aktuellen v1.4-Aufbau noch zu beschaffen
 
 | Pos. | Bauteil | Menge | Festlegung / Zweck |
 |---|---|---:|---|
-| 4 | Batteriehalter 2×18650 **parallel** | 1 | 76 × 40,5 × 20 mm; Jan Friedrich Elektronikversand oder dimensionsgleich |
-| 5 | 1S-BMS 3,7 V / 4 A | 1 | z. B. Funduino F23108292, 30,1 × 3,6 × 2 mm; Schutz der ungeschützten 25R |
-| 6 | Pololu S13V10F5 | 1 | 2,8–22 V → feste 5 V, typisch 1 A; 8,9 × 12,1 × 4,2 mm; Versorgung GC-1602 |
-| 7 | Joy-IT COM-MSD | 1 | 3,3-V-SPI, 18 × 21 × 12 mm; Offline-Logging |
-| 8 | microSD-Karte | 1 | 16–32 GB High-Endurance/Industrial bevorzugt |
-| 9 | Widerstand 10 kΩ, 1 % | 1 | GC-INT-Pegelteiler oben |
-| 10 | Widerstand 20 kΩ, 1 % | 1 | GC-INT-Pegelteiler unten |
-| 11 | Hauptschalter | 1 | rastender abgedichteter M12-Schalter, >=2 A DC |
-| 12 | U.FL/IPEX → SMA-Female Bulkhead | 1 | 5–10 cm, 50 Ω; LoRa-Antenne außen |
-| 13 | 868-MHz-SMA-Antenne | 1 | etwa 2 dBi; EU868 |
-| 14 | 2-mm-Silikon-Rundschnur | ~0,6 m | Hauptgehäusedichtung |
-| 15 | 1-mm-Polycarbonat | 2 Fenster | von innen für beide Displays |
-| 16 | PET/Mylar-Folie 25–50 µm | 1 Stück | Beta-Membran vor dem Zählrohr |
-| 17 | M3 Heat-Set Inserts | 10–12 | Hauptdeckel + Beta-Kappe |
-| 18 | M3×8/M3×10 Edelstahl | 10–12 | Gehäuseverschraubung |
-| 19 | PETG oder ASA | ~300–400 g | Gehäuse, Tracker-Shelf, Beta-Kappe |
+| 5 | Joy-IT COM-MSD oder dimensionsgleiches 3,3-V-SPI-microSD-Modul | 1 | Designhülle 21 × 18 × 12 mm |
+| 6 | microSD-Karte | 1 | 16–32 GB High-Endurance/Industrial bevorzugt |
+| 7 | Widerstand 10 kΩ, 1 % | 1 | GC-INT-Pegelteiler oben |
+| 8 | Widerstand 20 kΩ, 1 % | 1 | GC-INT-Pegelteiler unten |
+| 9 | abgedichteter M12-Schalter | 1 | optionaler Hauptschalter; Gehäuseöffnung vorhanden |
+| 10 | U.FL/IPEX → SMA-Female Bulkhead | 1 | 5–10 cm, 50 Ω; LoRa-Antenne außen |
+| 11 | 868-MHz-SMA-Antenne | 1 | ca. 2 dBi; EU868 |
+| 12 | 2-mm-Silikon-Rundschnur | ~0,7 m | Hauptgehäusedichtung |
+| 13 | 1-mm-Polycarbonat | 2 Fenster | von innen für beide Displays |
+| 14 | PET/Mylar-Folie 25–50 µm | 1 Stück | Beta-Membran vor dem Zählrohr |
+| 15 | M3 Heat-Set Inserts | 10–12 | Hauptdeckel + Beta-Kappe |
+| 16 | M3×8/M3×10 Edelstahl | 10–12 | Gehäuseverschraubung |
+| 17 | PETG oder ASA | ~350–500 g | Base/Lid/Service-Bridge/Beta-Kappe |
 
-## Stromversorgung
+## Battery Shield – verifizierter und noch zu prüfender Stand
 
-```mermaid
-flowchart LR
-    C1[18650 #1] --> H[Parallelhalter 1S2P]
-    C2[18650 #2] --> H
-    H --> BMS[1S BMS]
-    BMS --> SW[Hauptschalter]
-    SW --> HEL[HITT Tracker VBAT]
-    SW --> REG[Pololu S13V10F5]
-    REG --> GC[GC-1602 5 V]
-```
+Das vorhandene Board entspricht mechanisch und optisch der verbreiteten dualen 18650-Powerbank-Shield-Familie (DFR0969/OKY3604-2-artig): HOLD/NORMAL-Schalter, Ladeeingang, USB-Ausgang und 5-V/3,3-V-Ausgänge.
 
-Die beiden 25R werden **parallel**, nicht seriell betrieben. Vor dem gemeinsamen Einsetzen müssen beide Zellen nahezu die gleiche Leerlaufspannung haben. Beim ausgewählten Parallelhalter ist laut Händler eine Polaritätsmarkierung auf einer Seite falsch; deshalb vor Anschluss die reale Polarität mit dem Multimeter prüfen.
+**Mechanisch verifiziert am realen Board:** 100,2 × 48,0 mm und ca. 5 mm Bauteilüberstand auf der Unterseite.
+
+**Vor der endgültigen elektrischen Verdrahtung prüfen:**
+
+1. Zellpolarität an beiden Haltern.
+2. beide 18650 vor Parallelschaltung auf nahezu gleiche Spannung bringen.
+3. Ausgang 5 V mit Multimeter ohne Last und unter Last messen.
+4. NORMAL/HOLD-Verhalten testen.
+5. Ladefunktion und Abschalt-/Schutzverhalten verifizieren.
+6. Ruhestrom in HOLD messen; einige Shield-Revisionen halten die Powerbank über einen Dummy-Load aktiv und können dadurch unnötig Energie verheizen.
+
+Wenn das reale Shield die erwarteten 5 V stabil liefert, kann der GC-1602 direkt aus dessen 5-V-Schiene versorgt werden. Der Tracker kann je nach verifiziertem Power-Path über die geeignete Shield-Schiene bzw. seinen Batterieeingang versorgt werden.
+
+Ein separater BMS + Pololu-Boost aus Field Case v1.2 ist **nicht mehr mechanischer Bestandteil von v1.4**, bleibt aber als Fallback-Architektur möglich, falls das reale Battery Shield beim Last-/Ruhestromtest ungeeignet ist.
 
 ## LoRaWAN-Infrastruktur
 
