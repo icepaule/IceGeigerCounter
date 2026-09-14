@@ -14,7 +14,7 @@ Wichtige belegte Pins der V1.1-Familie:
 
 ## GC-1602-INT an ESP32
 
-Der erste Entwurf nutzte GPIO47. Laut Heltec-Pinout ist GPIO47 als Boot-Mode-Pin belegt. Für die reale Tracker-Familie wird deshalb **GPIO17** verwendet.
+Für die reale Tracker-Familie wird **GPIO17** verwendet.
 
 - GC-1602 `INT` → **10 kΩ** → ESP32 **GPIO17**
 - GPIO17 → **20 kΩ** → GND
@@ -24,7 +24,7 @@ Bei 5 V Eingang liefert der ideale Teiler etwa 3,33 V. Vor Anschluss den realen 
 
 ## microSD
 
-| Joy-IT COM-MSD | Tracker |
+| microSD SPI | Tracker |
 |---|---|
 | CLK | GPIO4 |
 | MISO | GPIO5 |
@@ -45,23 +45,37 @@ Serial1.begin(115200, SERIAL_8N1, 33, 34);
 
 GPIO33 ist MCU-RX vom UC6580-TX, GPIO34 MCU-TX zum UC6580-RX.
 
-## Akku und 5-V-Zweig
+## Aktueller Akku-/5-V-Zweig – Battery Shield
+
+Field Case v1.4 ersetzt den separaten 1S2P-Halter, BMS und Pololu-Boost mechanisch durch das vorhandene duale 18650 Battery Shield.
 
 ```mermaid
 flowchart LR
-    A[2× INR18650-25R parallel] --> B[1S-BMS]
-    B --> S[abgedichteter Hauptschalter]
-    S --> T[Tracker VBAT]
-    S --> P[Pololu S13V10F5]
-    P --> G[GC-1602 5 V]
+    C1[INR18650-25R #1] --> BS[Dual 18650 Battery Shield]
+    C2[INR18650-25R #2] --> BS
+    BS -->|5 V nach Mess-/Lasttest| GC[GC-1602 5 V]
+    BS -->|geeignete verifizierte Versorgung| T[HITT Tracker]
 ```
 
-Der Tracker besitzt eigenes Lithium-Lademanagement. Der externe BMS schützt das **gesamte 1S2P-Pack** der ungeschützten 25R. Der Pololu-Regler hat keinen Verpolschutz; Polarität vor Erstanschluss prüfen.
+Das reale Shield ist mechanisch mit **100,2 × 48,0 mm** vermessen. Optisch entspricht es der DFR0969/OKY3604-2-artigen Powerbank-Shield-Familie mit HOLD/NORMAL, Ladeelektronik, Schutz und 5-V-Ausgang. Weil Clone-Revisionen variieren, werden diese elektrischen Funktionen **vor Anschluss** mit Multimeter und Last geprüft und nicht nur aus dem Aussehen abgeleitet.
+
+### Erstinbetriebnahme des Battery Shields
+
+1. beide 25R einzeln messen und nur bei nahezu gleicher Zellspannung gemeinsam einsetzen,
+2. Polarität der beiden Schächte gegen die PCB-Markierung prüfen,
+3. Shield ohne IceGeiger einschalten,
+4. 5-V-Ausgang messen,
+5. Testlast anschließen und Spannung/Strom/Temperatur beobachten,
+6. NORMAL/HOLD testen,
+7. Ruhestrom in HOLD messen,
+8. erst danach GC-1602 und Tracker anschließen.
+
+Hinweis: Bei einigen Shields dieser Bauart erzwingt HOLD den Dauerbetrieb mittels Zusatzlast. Das verhindert das Powerbank-Auto-Off, erhöht aber den Ruhestrom. Für den Schuppenbetrieb muss der reale Verbrauch deshalb gemessen werden.
 
 ## Batterie-Messung
 
-Heltec dokumentiert für GPIO1 `VBAT = Vbat_Read × 4.9`. Die Firmware liest GPIO1 und veröffentlicht den daraus berechneten Batteriewert. Bei Inbetriebnahme gegen ein Multimeter prüfen und falls nötig kalibrieren.
+Heltec dokumentiert für GPIO1 `VBAT = Vbat_Read × 4.9`. Ob GPIO1 in der finalen Battery-Shield-Versorgung weiterhin die reale Zellspannung sinnvoll abbildet, wird beim Verdrahtungstest gegen das Multimeter geprüft. Falls nicht, wird die Firmware-Skalierung bzw. der Messpunkt angepasst.
 
 ## HF/GNSS-Anordnung
 
-Der Tracker wird im Gehäuse um 180° gedreht, damit die GNSS-Patchantenne über einem **22 × 24 mm metallfreien Hohlraum** sitzt und nicht direkt über den Stahlhüllen der 18650. LoRa wird über ein kurzes U.FL→SMA-Pigtail zu einer abgedichteten SMA-Durchführung geführt.
+Der Tracker sitzt auf der herausnehmbaren Service-Brücke oberhalb des Battery Shields. Unter der GNSS-Patchantenne ist der Bridge-Bereich offen. LoRa wird über ein kurzes U.FL→SMA-Pigtail zu einer abgedichteten SMA-Durchführung geführt.
