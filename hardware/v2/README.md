@@ -1,14 +1,21 @@
 # IceGeiger V2 Hardware
 
-Current enclosure: [`field_case_v12/`](field_case_v12/) for the delivered HITT-Tracker V1.2, two replaceable INR18650-25R cells and the ordered GC-1602-NANO.
+Current print candidate: [`field_case_v14/`](field_case_v14/) for:
 
-The older `openscad/icegeiger_v2_enclosure.scad` and `stl/icegeiger_v2_*_PRELIMINARY.stl` remain as historical first-pass geometry. **Do not print them for the current HITT-Tracker build.**
+- GC-1602-NANO
+- delivered HITT-Tracker V1.2
+- physically measured dual-18650 Battery Shield
+- two replaceable INR18650-25R cells
+- microSD
+- removable beta cap and silicone-cord lid seal
 
-For the current design run:
+The older `field_case_v12/`, `openscad/icegeiger_v2_enclosure.scad` and older STL files remain as historical geometry. **Use `field_case_v14/` for the current Battery-Shield build.**
+
+Build current CAD locally:
 
 ```bash
-./scripts/build-field-case-v12.sh
-./scripts/render-field-case-v12.sh
+./scripts/build-field-case-v14.sh
+./scripts/render-field-case-v14.sh
 ```
 
-GC-specific dimensions remain PRELIMINARY until the purchased board is physically measured.
+The Battery Shield dimensions are based on the actual measured hardware. GC-specific hole spacing is intentionally not hard-coded yet; v1.4 uses broad drillable mounting pads so the current print can be tested without inventing an unverified GC hole pattern.
