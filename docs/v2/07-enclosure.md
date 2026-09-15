@@ -1,26 +1,28 @@
 # V2 – Field Case / OpenSCAD / STL
 
-Der aktuelle Druckstand liegt unter **`hardware/v2/field_case_v14/`**.
+Der aktuelle Druckstand liegt unter **`hardware/v2/field_case_v151/`**.
 
-![assembled](images/field_case_v14_assembled.png)
+![assembled](images/field_case_v151_assembled.png)
 
-![internal layout](images/field_case_v14_internal_layout.png)
+![internal layout](images/field_case_v151_internal_layout.png)
 
-## Was sich gegenüber v1.2 geändert hat
+![exploded](images/field_case_v151_exploded_labeled.png)
 
-Field Case v1.4 integriert das real vorhandene duale 18650 Battery Shield direkt in das Gesamtgehäuse.
+## Was sich in v1.5.1 geändert hat
+
+Der erste reale Passformtest des dualen 18650 Battery Shields wurde in das CAD übernommen.
 
 - Shield real gemessen: **100,2 × 48,0 mm**
-- maximaler Bauteilüberstand an der Unterseite: **5 mm**
-- zwei massive **5 × 5 mm Befestigungsschienen** an den kurzen Shield-Seiten
-- wechselbare INR18650-25R bleiben im Shield
-- herausnehmbare **Service-Brücke** oberhalb der Akkus
-- HITT-Tracker + microSD auf dieser Brücke
-- offene Schlitze für die bereits verlöteten Tracker-Pinleisten
-- offene Zone unter der GNSS-Patchantenne
-- separater BMS/Pololu-Boost aus v1.2 entfällt mechanisch; das reale Shield wird vor Nutzung elektrisch vermessen
+- Lochmitten in Längsrichtung: **97,0 mm**
+- Auflageschienen auf **90,0 mm** gekürzt
+- daraus etwa **5,1 mm freie Länge pro PCB-Ende**
+- vier separate **10 × 10 mm** Insert-Auflagen an den 97-mm-Lochachsen
+- zwei **10 × 10 mm** Kabelöffnungen in der Zwischenwand
+- **11-mm** Kabel-/Stromdurchführung an der Shield-Seite
+- verstärkte Aufhängeöse mit **12-mm** Seilöffnung
+- separates, andersfarbig druckbares `REAR_BADGE` mit Radioaktivsymbol und `IceDrone`
 
-Die vorherige `field_case_v12/` bleibt als historischer Stand im Repository.
+Die Y-Position der Shield-Gewindeeinsätze wird bewusst nicht aus dem Foto geraten: Das reale Shield wird auf die 10×10-mm-Auflagen gelegt und dient selbst als Bohr-/Heat-Insert-Schablone.
 
 ## Aufbau
 
@@ -29,38 +31,71 @@ Zwei Funktionszonen:
 - **Messkammer:** GC-1602-NANO, LCD, Zählrohr und HV-Elektronik
 - **Servicekammer:** duales 18650 Battery Shield, 2×18650, Service-Brücke, HITT-Tracker, microSD und LoRa-Pigtail
 
+Die herausnehmbare Service-Brücke sitzt oberhalb der Akkus. Sie besitzt offene Schlitze für die bereits verlöteten Tracker-Pinleisten sowie eine offene Zone unter der GNSS-Patchantenne.
+
 ## Abmessungen
 
 - CAD-Hauptkörper: **130 × 132 × 58 mm**
 - Deckel: **4,2 mm**
-- maximale STL-Hüllfläche inklusive Schraubbossen: ca. **140,4 × 142,4 mm**
 - Service-Brücke: **119 × 31 mm**
-- Beta-Schutzkappe: ca. **104 × 26 mm**
+- Beta-Schutzkappe: etwa **104 × 26 mm**
+- Battery-Shield-Auflageschienen: **90 × 5 × 5 mm**
+- Drone-Aufhängeöse: **12 mm freie Öffnung**
+
+## OpenSCAD-Dateien
+
+Das Gesamtmodell liegt in:
+
+- `IceGeiger_FieldCase_v1.5.1_COMPLETE.scad`
+
+Zusätzlich gibt es für jedes Teil eine eigene OpenSCAD-Wrapperdatei:
+
+- `IceGeiger_FieldCase_v1.5.1_BASE.scad`
+- `IceGeiger_FieldCase_v1.5.1_LID.scad`
+- `IceGeiger_FieldCase_v1.5.1_SERVICE_BRIDGE.scad`
+- `IceGeiger_FieldCase_v1.5.1_BETA_CAP.scad`
+- `IceGeiger_FieldCase_v1.5.1_REAR_BADGE.scad`
+- `IceGeiger_FieldCase_v1.5.1_GASKET_JIG.scad`
+
+Die Wrapper laden die COMPLETE-Datei aus demselben Ordner, damit nur ein Master-CAD gepflegt werden muss.
 
 ## Druckteile
 
-GitHub Actions erzeugt aus dem eigenständigen OpenSCAD-Modell:
+GitHub Actions erzeugt daraus unter `hardware/v2/field_case_v151/stl/`:
 
-- `icegeiger_field_case_v14_base.stl`
-- `icegeiger_field_case_v14_lid.stl`
-- `icegeiger_field_case_v14_service_bridge.stl`
-- `icegeiger_field_case_v14_beta_cap.stl`
-- `icegeiger_field_case_v14_gasket_jig.stl`
+- `IceGeiger_FieldCase_v1.5.1_BASE.stl`
+- `IceGeiger_FieldCase_v1.5.1_LID.stl`
+- `IceGeiger_FieldCase_v1.5.1_SERVICE_BRIDGE.stl`
+- `IceGeiger_FieldCase_v1.5.1_BETA_CAP.stl`
+- `IceGeiger_FieldCase_v1.5.1_REAR_BADGE.stl`
+- `IceGeiger_FieldCase_v1.5.1_GASKET_JIG.stl`
+
+Zusätzlich werden PNGs aller Einzelteile sowie Komplett-, Layout- und beschriftete Explosionsansichten generiert.
 
 ## Battery-Shield-Befestigung
 
-Die kurzen PCB-Enden stehen auf zwei durchgehenden 5-mm-Schienen. Sie sind absichtlich **nicht vorgebohrt**, da das reale Lochbild des Clone-Shields noch nicht mit dem Messschieber aufgenommen wurde.
+Die 90-mm-Schienen unterstützen die Längsseiten, ohne an den realen Endbereichen des Shields anzustoßen. Die vier 10×10-mm-Insert-Auflagen liegen an den gemessenen 97-mm-X-Achsen.
 
 Vorgehen:
 
 1. Base drucken.
 2. Shield ohne Zellen trocken auflegen.
-3. Ausrichten.
-4. durch die realen Shield-Bohrungen die Schienen markieren.
-5. Pilotloch passend zur gewählten M3-Befestigung bohren.
-6. erst danach Elektronik montieren.
+3. Shield so ausrichten, dass Anschlüsse und 11-mm-Durchführung frei bleiben.
+4. durch die realen Shield-Bohrungen die 10×10-mm-Auflagen markieren.
+5. Bohrung/Heat-Insert passend zur verwendeten M3-Hülse setzen.
+6. erst danach Elektronik endgültig montieren.
 
-So bleibt der Druck unabhängig von unzuverlässigen Online-Lochmaßen nutzbar.
+## Kabeldurchführungen
+
+Die Trennwand besitzt zwei Öffnungen mit **10 × 10 mm**. Sie sind für Stromversorgung sowie Signal-/Versorgungsleitungen zwischen GC-Kammer und Servicekammer vorgesehen.
+
+Die äußere **11-mm-Durchführung** befindet sich beim Battery Shield und kann mit einer geeigneten Kabelverschraubung oder Durchführung belegt werden.
+
+## Drone-Aufhängung
+
+Die hintere/obere Gehäusewand trägt eine verstärkte Öse mit 12-mm-Loch. Sie ist für ein dickes Seil bzw. eine Drone-Sling-Aufhängung gedacht.
+
+Ein FDM-gedruckter Lastpunkt ist **kein zertifiziertes Flugbauteil**. Vor einem Flug mit Mehrfachlast statisch prüfen und bei frühen Versuchen zusätzlich ein unabhängiges Sicherungsseil verwenden. Nicht über Personen testen.
 
 ## Beta-Fenster
 
@@ -80,11 +115,13 @@ Das ist eine Konstruktionsmaßnahme für Spritzwasserschutz, **keine IP-Zertifiz
 
 ## Kollisionsprüfung
 
-Siehe `hardware/v2/field_case_v14/FIT_REPORT.md`.
+`hardware/v2/field_case_v151/check_fit.py` prüft die bekannten Hüllen und die neue Shield-Geometrie.
 
 Wichtige berechnete Abstände:
 
-- Shield-Unterseitenbauteil → Gehäuseboden: **1,2 mm**
+- Auflageschiene: **90,0 mm**
+- Shield-Endfreiheit: **ca. 5,1 mm je Ende**
+- Shield-Unterseitenbauteil → Gehäuseboden: **ca. 1,2 mm**
 - Akkuoberseite → Service-Brücke: **ca. 4,1 mm**
 - Akkuoberseite → Tracker-Pinspitzen: **ca. 5,0 mm**
 - Tracker → Deckelebene: **ca. 9,4 mm**
@@ -93,6 +130,6 @@ Wichtige berechnete Abstände:
 
 ## GC-1602
 
-Für den GC wird weiterhin die Händlerhülle **108 × 65 × 47 mm** verwendet. Weil das reale Lochbild noch nicht vermessen ist, verwendet v1.4 breite massive Eckpads. Nach Ankunft/Passprobe wird durch die echten GC-Bohrungen gebohrt; dadurch hängt die Verwendbarkeit dieses Drucks nicht von geschätzten Lochabständen ab.
+Für den GC wird weiterhin die Händlerhülle **108 × 65 × 47 mm** verwendet. Weil das reale GC-Lochbild noch nicht exakt vermessen ist, verwendet v1.5.1 weiterhin breite massive Eckpads statt erfundener Lochabstände.
 
-v1.4 ist damit der aktuelle **Print Candidate** für den laufenden physischen Passformtest.
+v1.5.1 ist der aktuelle **Print Candidate** für den laufenden physischen Passformtest.
