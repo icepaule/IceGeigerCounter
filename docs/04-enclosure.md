@@ -19,7 +19,7 @@ Aktueller V2-Druckstand:
 - umlaufende 2-mm-Silikon-Dichtung
 - Beta-Messfenster mit dünner Membran und abnehmbarer Schutzkappe
 - 12-mm-Aufhängeöse für Seil/Drone-Sling
-- separates Kontrastfarbteil mit Radioaktivsymbol und `IceDrone`
+- separates Kontrastfarbteil mit Radioaktivsymbol und `IceGeiger`
 
 ![Field Case – assembled](v2/images/field_case_v151_assembled.png)
 
@@ -39,11 +39,24 @@ Zusätzlich besitzt die Zwischenwand zwei **10 × 10 mm** Kabeldurchführungen u
 
 Die älteren `field_case_v14/`- und `field_case_v12/`-Geometrien bleiben als Historie erhalten.
 
+## Rear Badge v1.5.3 – ACE Pro
+
+Für den Kobra S1 + ACE Pro gibt es unter `hardware/v2/field_case_v151/badge_v153/` eine echte Zweifarben-Version des Badges:
+
+- Hintergrund als eigener schwarzer Körper
+- Radioaktivsymbol + `IceGeiger` als eigener gelber Körper
+- gemeinsame Koordinaten für Multi-Part-Import
+- 0,40-mm-Verzahnung zwischen beiden Materialien
+- 0,90 mm sichtbar erhabenes Logo/Schrift
+- Multi-Part-3MF für Anycubic Slicer Next
+
+`badge_v152/` bleibt historisch erhalten und enthält noch den supersedierten Schriftzug `IceDrone`.
+
 ## OpenSCAD / STL / PNG
 
 `field_case_v151/` enthält ein Master-CAD und einzelne OpenSCAD-Dateien für Base, Lid, Service Bridge, Beta Cap, Rear Badge und Gasket Jig. Die Einzeldateien laden die Master-SCAD aus demselben Ordner und wählen nur das jeweilige Druckteil aus.
 
-GitHub Actions erzeugt daraus automatisch die einzelnen STL-Dateien und PNG-Vorschauen sowie Komplett-, Layout- und beschriftete Explosionsansichten.
+GitHub Actions erzeugt daraus automatisch die einzelnen STL-Dateien und PNG-Vorschauen sowie Komplett-, Layout- und beschriftete Explosionsansichten. Für Badge v1.5.3 werden zusätzlich die zwei ACE-STLs, eine einfarbige STL, Preview-PNGs und eine Multi-Part-3MF erzeugt.
 
 ## Abmessungen und Status
 

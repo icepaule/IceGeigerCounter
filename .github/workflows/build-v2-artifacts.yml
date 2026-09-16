@@ -29,7 +29,9 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y openscad xvfb python3-matplotlib nodejs
+          sudo apt-get install -y openscad xvfb python3-matplotlib python3-venv nodejs
+          python3 -m venv .venv
+          .venv/bin/pip install trimesh lxml
       - name: Validate existing project
         run: ./scripts/validate.sh
       - name: Build current Field Case v1.5.1
@@ -37,23 +39,25 @@ jobs:
           chmod +x ./scripts/build-field-case-v151.sh ./scripts/render-field-case-v151.sh
           ./scripts/build-field-case-v151.sh
           ./scripts/render-field-case-v151.sh
-      - name: Build ACE two-color badge v1.5.2
+      - name: Build ACE two-color badge v1.5.3
         run: |
-          chmod +x ./scripts/build-badge-v152.sh ./scripts/render-badge-v152.sh
-          ./scripts/build-badge-v152.sh
-          ./scripts/render-badge-v152.sh
+          chmod +x ./scripts/build-badge-v153.sh ./scripts/render-badge-v153.sh
+          ./scripts/build-badge-v153.sh
+          .venv/bin/python ./scripts/build-badge-v153-3mf.py
+          ./scripts/render-badge-v153.sh
       - name: Commit generated CAD artifacts
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add hardware/v2/field_case_v151/stl \
-                  hardware/v2/field_case_v151/badge_v152/stl \
+                  hardware/v2/field_case_v151/badge_v153/stl \
+                  hardware/v2/field_case_v151/badge_v153/3mf \
                   docs/v2/images/field_case_v151_*.png \
-                  docs/v2/images/field_case_v152_badge_*.png
+                  docs/v2/images/field_case_v153_badge_*.png
           if git diff --cached --quiet; then
             echo 'Generated artifacts already current.'
           else
-            git commit -m 'Generate Field Case and ACE badge artifacts [skip ci]'
+            git commit -m 'Generate Field Case and IceGeiger ACE badge artifacts [skip ci]'
             git reset --hard HEAD
             git clean -fd
             git push origin HEAD:main
@@ -61,9 +65,10 @@ jobs:
       - name: Upload current CAD artifact bundle
         uses: actions/upload-artifact@v4
         with:
-          name: icegeiger-v2-field-case-v151-badge-v152
+          name: icegeiger-v2-field-case-v151-badge-v153
           path: |
             hardware/v2/field_case_v151/stl/
-            hardware/v2/field_case_v151/badge_v152/stl/
+            hardware/v2/field_case_v151/badge_v153/stl/
+            hardware/v2/field_case_v151/badge_v153/3mf/
             docs/v2/images/field_case_v151_*.png
-            docs/v2/images/field_case_v152_badge_*.png
+            docs/v2/images/field_case_v153_badge_*.png
