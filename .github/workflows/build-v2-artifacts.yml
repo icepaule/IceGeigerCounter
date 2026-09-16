@@ -31,7 +31,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y openscad xvfb python3-matplotlib python3-venv nodejs
           python3 -m venv .venv
-          .venv/bin/pip install trimesh lxml
+          .venv/bin/pip install trimesh lxml networkx
       - name: Validate existing project
         run: ./scripts/validate.sh
       - name: Build current Field Case v1.5.1
