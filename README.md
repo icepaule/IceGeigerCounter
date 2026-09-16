@@ -68,15 +68,18 @@ v1.5.1 integriert die Ergebnisse des ersten physischen Battery-Shield-Passformte
 - verstärkte 12-mm-Aufhängeöse für Seil/Drone-Sling
 - jedes Druckteil besitzt eine eigene OpenSCAD-Wrapperdatei; die COMPLETE-SCAD enthält das Gesamtmodell
 
-### ACE Zweifarben-Badge v1.5.2
+### ACE Zweifarben-Badge v1.5.3
 
-Unter **`hardware/v2/field_case_v151/badge_v152/`** liegt die Zweifarben-Version des Rear Badges für Kobra S1 + ACE Pro:
+Unter **`hardware/v2/field_case_v151/badge_v153/`** liegt die aktuelle Zweifarben-Version des Rear Badges für Kobra S1 + ACE Pro:
 
 - schwarze Grundplatte als eigener STL-Körper
-- Radioaktivsymbol + `IceDrone` als eigener gelber STL-Körper
+- Radioaktivsymbol + **`IceGeiger`** als eigener gelber STL-Körper
 - beide Körper verwenden dieselben Koordinaten für Multi-Part-Import
+- fertige Multi-Part-3MF für Anycubic Slicer Next
 - 0,40-mm-Verzahnung zwischen Grundplatte und Schrift/Logo
 - 0,90 mm sichtbare Erhöhung von Schrift und Symbol
+
+`badge_v152/` bleibt als historischer Stand erhalten und enthält noch den supersedierten Schriftzug `IceDrone`.
 
 Die älteren `field_case_v14/` und `field_case_v12/` bleiben als historische Stände erhalten.
 
