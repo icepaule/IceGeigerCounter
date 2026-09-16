@@ -20,7 +20,7 @@ Der erste reale Passformtest des dualen 18650 Battery Shields wurde in das CAD �
 - zwei **10 × 10 mm** Kabelöffnungen in der Zwischenwand
 - **11-mm** Kabel-/Stromdurchführung an der Shield-Seite
 - verstärkte Aufhängeöse mit **12-mm** Seilöffnung
-- separates, andersfarbig druckbares `REAR_BADGE` mit Radioaktivsymbol und `IceDrone`
+- separates Rear Badge mit Radioaktivsymbol; aktuelle Beschriftung: `IceGeiger`
 
 Die Y-Position der Shield-Gewindeeinsätze wird bewusst nicht aus dem Foto geraten: Das reale Shield wird auf die 10×10-mm-Auflagen gelegt und dient selbst als Bohr-/Heat-Insert-Schablone.
 
@@ -71,6 +71,21 @@ GitHub Actions erzeugt daraus unter `hardware/v2/field_case_v151/stl/`:
 - `IceGeiger_FieldCase_v1.5.1_GASKET_JIG.stl`
 
 Zusätzlich werden PNGs aller Einzelteile sowie Komplett-, Layout- und beschriftete Explosionsansichten generiert.
+
+## ACE Zweifarben-Badge v1.5.3
+
+Die aktuelle Zweifarben-Variante liegt unter **`hardware/v2/field_case_v151/badge_v153/`** und ist für den Kobra S1 mit ACE Pro vorbereitet.
+
+- `IceGeiger_Badge_v1.5.3_BASE.stl` – Hintergrund, empfohlen schwarz
+- `IceGeiger_Badge_v1.5.3_LOGO_TEXT.stl` – Radioaktivsymbol + `IceGeiger`, empfohlen gelb
+- `IceGeiger_Badge_v1.5.3_ONE_COLOR.stl` – einfarbige Fallback-Variante
+- `3mf/IceGeiger_Badge_v1.5.3_ACE_2COLOR.3mf` – beide korrekt ausgerichteten Meshes als Multi-Part-3MF
+
+Die Basis ist 1,20 mm dick. Logo und Schrift greifen **0,40 mm** in eine passende Tasche der Grundplatte ein und stehen anschließend **0,90 mm** sichtbar hervor. Dadurch ist die Mehrfarbenverbindung nicht nur auf eine einzelne Deckschicht angewiesen.
+
+In Anycubic Slicer Next werden `BASE` und `LOGO_TEXT` als Teile **eines Objekts** behandelt. ACE-Farbzuordnung: Grundplatte schwarz, Logo/Schrift gelb bzw. fluoreszierend gelb.
+
+`badge_v152/` bleibt aus Reproduzierbarkeitsgründen erhalten, enthält aber noch den supersedierten Schriftzug `IceDrone`.
 
 ## Battery-Shield-Befestigung
 
@@ -132,4 +147,4 @@ Wichtige berechnete Abstände:
 
 Für den GC wird weiterhin die Händlerhülle **108 × 65 × 47 mm** verwendet. Weil das reale GC-Lochbild noch nicht exakt vermessen ist, verwendet v1.5.1 weiterhin breite massive Eckpads statt erfundener Lochabstände.
 
-v1.5.1 ist der aktuelle **Print Candidate** für den laufenden physischen Passformtest.
+v1.5.1 bleibt der aktuelle Gehäuse-**Print Candidate**; v1.5.3 bezeichnet die aktuelle ACE-Badge-Revision.
