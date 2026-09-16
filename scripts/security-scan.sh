@@ -9,12 +9,17 @@ for f in firmware/icegeiger_v2/secrets.h integrations/bridge/.env; do
 done
 
 # `--` is required because the private-key pattern begins with dashes and would
-# otherwise be parsed by grep as an option. Binary CAD/render artifacts are
-# excluded so random binary bytes cannot create false positives.
+# otherwise be parsed by grep as an option. Generated dependency trees and
+# binary CAD/render artifacts are excluded so third-party package source and
+# random binary bytes cannot create false positives. The scan remains focused
+# on repository-owned source/configuration text.
 PATTERN='-----BEGIN (RSA |EC |OPENSSH )?PRIVATE KEY-----|(appkey|nwkkey|password|passwd|token|secret)[[:space:]]*[:=][[:space:]]*[A-Za-z0-9+/=_-]{20,}'
 
 if grep -RIE \
   --exclude-dir=.git \
+  --exclude-dir=.venv \
+  --exclude-dir=venv \
+  --exclude-dir=node_modules \
   --exclude='*.stl' \
   --exclude='*.3mf' \
   --exclude='*.png' \
