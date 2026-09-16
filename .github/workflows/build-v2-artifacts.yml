@@ -29,8 +29,9 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y openscad xvfb python3-matplotlib python3-pip nodejs
-          python3 -m pip install --user trimesh lxml
+          sudo apt-get install -y openscad xvfb python3-matplotlib python3-venv nodejs
+          python3 -m venv .venv
+          .venv/bin/pip install trimesh lxml
       - name: Validate existing project
         run: ./scripts/validate.sh
       - name: Build current Field Case v1.5.1
@@ -42,7 +43,7 @@ jobs:
         run: |
           chmod +x ./scripts/build-badge-v153.sh ./scripts/render-badge-v153.sh
           ./scripts/build-badge-v153.sh
-          python3 ./scripts/build-badge-v153-3mf.py
+          .venv/bin/python ./scripts/build-badge-v153-3mf.py
           ./scripts/render-badge-v153.sh
       - name: Commit generated CAD artifacts
         run: |
