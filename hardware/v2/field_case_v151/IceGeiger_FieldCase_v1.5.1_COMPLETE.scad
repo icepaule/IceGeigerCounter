@@ -134,7 +134,8 @@ module badge(){
  union(){
   linear_extrude(badge_t)offset(r=1.2)square([badge_l-2.4,badge_h-2.4],center=true);
   translate([-badge_l/2+15,0,badge_t])linear_extrude(badge_raise)trefoil();
-  translate([-11,-4.8,badge_t])linear_extrude(badge_raise)text("IceDrone",size=9,font="Liberation Sans:style=Bold");
+  // Badge typography fix: keep all lettering inside the 78 x 24 mm background.
+  translate([10,0,badge_t])linear_extrude(badge_raise)text("IceDrone",size=7.2,halign="center",valign="center",font="Liberation Sans:style=Bold");
  }
 }
 module gasket_jig(){difference(){cube([36,36,6]);translate([7,7,6-seal_d])difference(){cube([22,22,seal_d+.2]);translate([seal_w,seal_w,-.1])cube([22-2*seal_w,22-2*seal_w,seal_d+.4]);}}}
