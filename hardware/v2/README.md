@@ -31,3 +31,21 @@ Key v1.5.1 physical measurements / print-test corrections:
 - 11 mm Shield-side cable feed-through
 
 GC-specific hole spacing is still intentionally not hard-coded; v1.5.1 uses broad drillable mounting pads so the real GC board can be used as the drilling template.
+
+## Rear badge v1.5.2 for Kobra S1 + ACE Pro
+
+The enclosure itself remains v1.5.1. The rear badge has a newer two-color ACE variant under [`field_case_v151/badge_v152/`](field_case_v151/badge_v152/).
+
+Build it locally with:
+
+```bash
+./scripts/build-badge-v152.sh
+./scripts/render-badge-v152.sh
+```
+
+The generated two meshes share the same coordinate system:
+
+- `IceGeiger_Badge_v1.5.2_BASE.stl` – recommended black
+- `IceGeiger_Badge_v1.5.2_LOGO_TEXT.stl` – recommended yellow / fluorescent yellow
+
+The artwork is keyed 0.40 mm into the background plate and remains 0.90 mm visibly raised above it.
