@@ -7,6 +7,7 @@
 #include "LoRaWan_APP.h"
 #include "HT_TinyGPS++.h"
 #include "secrets.h"
+#include "HT_st7735.h"        // Heltec driver for the on-board 0.96" ST7735 TFT (160x80)
 
 #if !defined(ICEGEIGER_SECRETS_CONFIGURED) || ICEGEIGER_SECRETS_CONFIGURED != 1
 #error "Copy secrets.example.h to secrets.h, fill locally and set ICEGEIGER_SECRETS_CONFIGURED to 1"
@@ -36,9 +37,28 @@ uint8_t appPort=2, confirmedNbTrials=1;
 uint32_t appTxDutyCycle=LORA_MOBILE_MS;   // required by Heltec LoRaWan_APP (extern in LoRaWan_APP.h)
 bool loraEnabled=false;                     // only transmit once an AppKey is provisioned (never TX with all-zero keys / possibly no antenna)
 
+// ---- On-board TFT status screen (Heltec Wireless Tracker: CS38 RST39 DC40 SCLK41 MOSI42, backlight GPIO21, power GPIO3) ----
+HT_st7735 tft; uint16_t lastCounts=0; uint32_t lastDraw=0;
+static void tftRow(uint8_t row,uint16_t color,const char *s){ char b[24]; snprintf(b,sizeof(b),"%-22s",s); tft.st7735_write_str(0,row*10,b,Font_7x10,color,ST7735_BLACK); }
+static void drawStatus(){
+  char l[48]; uint32_t cpm=cpm60(); bool fix=gps.location.isValid();
+  snprintf(l,sizeof(l),"CPM %lu %.2fuSv/h",(unsigned long)cpm,cpm/CPM_PER_USVH); tftRow(0,ST7735_WHITE,l);
+  snprintf(l,sizeof(l),"10s:%u tot:%lu",(unsigned)lastCounts,(unsigned long)pulseTotal); tftRow(1,ST7735_CYAN,l);
+  snprintf(l,sizeof(l),fix?"GPS FIX %usat H%.1f":"GPS no fix %usat",(unsigned)(gps.satellites.isValid()?gps.satellites.value():0),gps.hdop.isValid()?gps.hdop.hdop():0.0); tftRow(2,fix?ST7735_GREEN:ST7735_YELLOW,l);
+  if(fix) snprintf(l,sizeof(l),"%.4f %.4f",gps.location.lat(),gps.location.lng()); else snprintf(l,sizeof(l),"nmea chars:%lu",(unsigned long)gps.charsProcessed());
+  tftRow(3,ST7735_WHITE,l);
+  bool w=WiFi.status()==WL_CONNECTED, m=mqtt.connected();
+  snprintf(l,sizeof(l),"WiFi:%s MQTT:%s",w?"ok":"--",m?"ok":"--"); tftRow(4,(w&&m)?ST7735_GREEN:ST7735_RED,l);
+  const char *lr=!loraEnabled?"off":((deviceState==DEVICE_STATE_INIT||deviceState==DEVICE_STATE_JOIN)?"join":"ok");
+  snprintf(l,sizeof(l),"SD:%s LoRa:%s",sdOK?"ok":"--",lr); tftRow(5,ST7735_WHITE,l);
+  snprintf(l,sizeof(l),"Bat %.2fV",readBatteryMv()/1000.0f); tftRow(6,ST7735_WHITE,l);
+  snprintf(l,sizeof(l),"seq %lu up %lus",(unsigned long)seq,(unsigned long)(millis()/1000)); tftRow(7,ST7735_CYAN,l);
+  Serial.printf("[%lus] cpm60=%lu n10=%u tot=%lu gps_fix=%d sats=%u nmea=%lu wifi=%d mqtt=%d sd=%d lora=%s bat=%umV\n",(unsigned long)(millis()/1000),(unsigned long)cpm,(unsigned)lastCounts,(unsigned long)pulseTotal,(int)fix,(unsigned)(gps.satellites.isValid()?gps.satellites.value():0),(unsigned long)gps.charsProcessed(),(int)w,(int)m,(int)sdOK,lr,(unsigned)readBatteryMv());
+}
+
 void IRAM_ATTR tubeImpulse(){ pulseTotal++; }
 uint32_t unixFromGps(){
-  if(!gps.date.isValid()||!gps.time.isValid()) return 0;
+  if(!gps.location.isValid()||!gps.date.isValid()||!gps.time.isValid()) return 0;   // without a fix the UC6580 reports a stale RTC date (seen: Jan 2026)
   struct tm t={}; t.tm_year=gps.date.year()-1900; t.tm_mon=gps.date.month()-1; t.tm_mday=gps.date.day();
   t.tm_hour=gps.time.hour(); t.tm_min=gps.time.minute(); t.tm_sec=gps.time.second();
   return (uint32_t)mktime(&t);
@@ -93,6 +113,7 @@ void setup(){
   Serial.begin(115200);
   pinMode(GC_INT_PIN,INPUT); attachInterrupt(digitalPinToInterrupt(GC_INT_PIN),tubeImpulse,FALLING);
   pinMode(VBAT_PIN,INPUT);
+  tft.st7735_init(); tft.st7735_fill_screen(ST7735_BLACK); tftRow(0,ST7735_WHITE,"IceGeiger V2 boot");   // TFT init also sets GPIO3 (shared Vext) HIGH
   Serial1.begin(115200,SERIAL_8N1,33,34); pinMode(3,OUTPUT); digitalWrite(3,HIGH);
   sdSpi.begin(SD_SCK,SD_MISO,SD_MOSI,SD_CS); sdOK=SD.begin(SD_CS,sdSpi,8000000); if(sdOK&&!SD.exists("/icegeiger"))SD.mkdir("/icegeiger");
   copyLoRaSecrets(); for(uint8_t i=0;i<16;i++) if(appKey[i]) loraEnabled=true;
@@ -100,8 +121,9 @@ void setup(){
 }
 void loop(){
   feedGps(); ensureWifi(); ensureMqtt(); if(mqtt.connected())mqtt.loop(); if(loraEnabled) serviceLoRa();
-  if(millis()-lastLog>=LOG_MS){ lastLog+=LOG_MS; uint32_t now=pulseTotal; uint16_t counts=(uint16_t)min(now-lastPulseTotal,65535UL); lastPulseTotal=now; buckets[bucketPos]=counts; bucketPos=(bucketPos+1)%6; seq++;
+  if(millis()-lastLog>=LOG_MS){ lastLog+=LOG_MS; uint32_t now=pulseTotal; uint16_t counts=(uint16_t)min(now-lastPulseTotal,65535UL); lastPulseTotal=now; buckets[bucketPos]=counts; lastCounts=counts; bucketPos=(bucketPos+1)%6; seq++;
     String j=measurementJson(counts,cpm60()); appendLog(j); if(mqtt.connected()){ String t=String("icegeiger/")+DEVICE_ID+"/live"; mqtt.publish(t,j,false,1); backfill(); }
   }
+  if(millis()-lastDraw>=1000){ lastDraw=millis(); drawStatus(); }
   delay(1);
 }
