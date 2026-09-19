@@ -156,6 +156,7 @@ flowchart LR
 6. [Home Assistant](docs/v2/06-home-assistant.md)
 7. [Field Case / OpenSCAD / STL](docs/v2/07-enclosure.md)
 8. [Assembly](docs/v2/08-assembly.md)
+   - [Phase D Schritt für Schritt: INT-Schnittstelle](docs/v2/08a-phase-d-int-schnittstelle.md)
 9. [Testplan](docs/v2/09-commissioning-test.md)
 10. [Kalibrierung](docs/v2/10-calibration-data-quality.md)
 11. [Schuppenbetrieb](docs/v2/11-shed-operation.md)

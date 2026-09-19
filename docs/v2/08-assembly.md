@@ -29,6 +29,8 @@
 
 ## Phase D – INT-Schnittstelle
 
+Ausführliche Schritt-für-Schritt-Anleitung mit Verdrahtungsdiagramm, Wartezeiten und Messprotokoll: [08a-phase-d-int-schnittstelle.md](08a-phase-d-int-schnittstelle.md).
+
 1. GC-1602 einschalten.
 2. P3 `INT` gegen `GND` messen.
 3. Pegelteiler 10 kΩ / 20 kΩ aufbauen.
