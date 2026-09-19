@@ -58,11 +58,11 @@ Im Freien und danach im geschlossenen Gehäuse:
 
 ## Test 7 – LoRaWAN
 
-- [ ] OTAA Join erfolgreich
-- [ ] Uplink in ChirpStack sichtbar
-- [ ] Codec dekodiert Werte
-- [ ] Bridge erkennt `lorawan`
-- [ ] HA Livewerte aktualisieren sich
+- [ ] OTAA Join erfolgreich (Testaufbau nutzt ABP, siehe 05, Abschnitt 10)
+- [x] Uplink in ChirpStack sichtbar (ABP, Einkanal-Testgateway, 19.09.2026)
+- [x] Codec dekodiert Werte
+- [x] Bridge erkennt `lorawan`
+- [x] HA Livewerte aktualisieren sich
 - [ ] InfluxDB erhält Punkt mit korrekter Position
 - [ ] SMA/U.FL-Verbindung mechanisch spannungsfrei
 - [ ] Reichweitentest bei geschlossenem Gehäuse

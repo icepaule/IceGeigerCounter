@@ -111,3 +111,64 @@ Für Fahrten außerhalb der eigenen Gateway-Abdeckung:
 - SD bleibt vollständig,
 - WLAN-Backfill erfolgt nach Rückkehr,
 - Live-LoRaWAN erfordert ein Netz/Gateway, das die Route tatsächlich abdeckt.
+
+## 10. Testaufbau: T-Beam als Einkanal-Gateway (nur Uplink, ABP)
+
+Für den ersten Funktionstest ohne echtes Multi-Channel-Gateway dient ein **LILYGO T-Beam** als Einkanal-Empfänger. Das ist **kein LoRaWAN-konformes Gateway**:
+
+- empfängt nur auf **868,1 MHz, SF9 / 125 kHz** (DR3), keine Downlinks,
+- deshalb **ABP statt OTAA** (ein Join braucht ein Downlink),
+- nur für Tests gedacht. Für den Betrieb wird weiterhin ein Multi-Channel-Gateway (Abschnitt 1) mit OTAA verwendet.
+
+```mermaid
+flowchart LR
+  T[HITT-Tracker<br/>ABP, 868,1 MHz, SF9] -->|LoRa| G[T-Beam<br/>Einkanal-Empfänger]
+  G -->|Semtech UDP 1700| GB[ChirpStack Gateway Bridge]
+  GB --> CS[ChirpStack]
+  CS -->|MQTT application/.../event/up| M[MQTT-Broker]
+  M --> B[IceGeiger Bridge]
+  B --> HA[Home Assistant]
+```
+
+### 10.1 ChirpStack und Provisionierung
+
+Deployment und Skript: [integrations/chirpstack](../../integrations/chirpstack/README.md). Nach `provision.py` existieren Application `IceGeiger`, das Gateway, ein ABP-Gerät `icegeiger-v2` (gleicher Name wie das WLAN-Gerät, dadurch nutzen beide Übertragungswege dieselben Home-Assistant-Entities) und der Codec aus `integrations/chirpstack/codec.js`.
+
+### 10.2 Gateway-Firmware (T-Beam)
+
+Quelle: [firmware/tbeam_singlechannel_gateway](../../firmware/tbeam_singlechannel_gateway/tbeam_singlechannel_gateway.ino). `secrets.h` (WLAN, Adresse der Gateway Bridge) wird lokal aus `secrets.example.h` erzeugt.
+
+- erkennt Netz-/Funkbaustein selbst (getestet: **T-Beam v1.2, AXP2101, SX1276, 868 MHz**),
+- Gateway-EUI wird aus der WLAN-MAC gebildet (`xx:xx:xx:ff:fe:xx:xx:xx`) und muss in ChirpStack als Gateway angelegt sein,
+- leitet Frames als Semtech-UDP `PUSH_DATA` weiter, sendet `PULL_DATA` als Keep-alive und alle 30 s Statistik.
+
+Bekannte Fallen, die beim Test aufgetreten sind:
+
+- `WiFi.macAddress()` liefert vor dem Start des WLAN-Stacks nur Nullen; die EUI muss über `esp_read_mac` gebildet werden.
+- Die Frequenz muss als `868.1` (double) im JSON stehen. Als `float` ergibt sich `868.099976` und ChirpStack meldet `No channel found for frequency`.
+
+**Meshtastic-Gateway sichern und wiederherstellen:** Wird ein T-Beam mit Meshtastic dafür überschrieben, vorher ein vollständiges Flash-Abbild und den Konfigurationsexport sichern (`esptool read-flash 0 0x400000 backup.bin`, `meshtastic --export-config`). Die Dateien enthalten Kanalschlüssel und gehören nicht ins Repository. Wiederherstellung: `esptool write-flash 0 backup.bin`.
+
+### 10.3 Tracker-Firmware im ABP-Modus
+
+In der lokalen `secrets.h`:
+
+```cpp
+#define ICEGEIGER_LORAWAN_ABP 1
+static const uint32_t ICEGEIGER_DEV_ADDR = 0x........;     // aus geiger_device.json
+static const uint8_t ICEGEIGER_NWK_S_KEY[16] = { ... };
+static const uint8_t ICEGEIGER_APP_S_KEY[16] = { ... };
+#define ICEGEIGER_LORA_TEST_INTERVAL_MS 60000               // nur Testbuild
+```
+
+Im ABP-Modus nutzt die Firmware ausschließlich Kanal 0 (868,1 MHz), DR3, ADR aus. Die Frame-Zähler beginnen nach jedem Neustart bei 0, deshalb ist am Gerät in ChirpStack **`skipFcntCheck`** gesetzt (macht `provision.py`). Ohne AppKey/DevAddr sendet der Tracker nicht.
+
+Das Testintervall von 60 s entspricht bei diesem Payload (34 Byte, SF9) etwa 0,4 % Airtime und bleibt unter der 1-%-Grenze des Sub-Bands. Für den Betrieb gelten die Intervalle aus Abschnitt 7.
+
+### 10.4 Ergebnis (19.09.2026)
+
+- Der Tracker sendet, der T-Beam empfängt (34 Byte, RSSI und SNR im Nahbereich sehr hoch).
+- ChirpStack dekodiert den Uplink mit dem Codec, MQTT-Event `application/<id>/device/<devEui>/event/up` vorhanden.
+- Die Bridge übernimmt die Werte, die Home-Assistant-Entities aktualisieren sich.
+
+Nicht getestet: OTAA-Join, Multi-Channel-Empfang, Downlinks, Reichweite.

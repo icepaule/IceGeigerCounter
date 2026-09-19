@@ -24,6 +24,18 @@
 
 Hinweis: Die Röhre im GC-1602-NANO ist laut Upstream-Beschreibung eine J305. Der Faktor 151 ist ein Standardwert und keine Kalibrierung dieser Einheit; siehe [10-calibration-data-quality.md](10-calibration-data-quality.md).
 
+## Real verifiziert – Firmware, Netz, LoRaWAN-Testkette (19.09.2026)
+
+- [x] V2-Firmware baut mit Heltec-Paket 3.3.8; zwei Fehler behoben (fehlendes `appTxDutyCycle`, keine LoRa-Sendung ohne Schlüssel)
+- [x] Tracker verbindet sich mit WLAN und MQTT; alle 10 s ein Datensatz auf `icegeiger/icegeiger-v2/live`
+- [x] TFT-Statusanzeige und serielle Statuszeile laufen; GNSS liefert NMEA-Daten (noch kein Fix, Test drinnen)
+- [x] Ohne GNSS-Fix meldet der UC6580 ein altes RTC-Datum; `ts` wird deshalb nur mit Fix gesetzt
+- [x] ChirpStack v4 als Docker-Stack auf dem Home-Assistant-Host, Anbindung an den vorhandenen MQTT-Broker
+- [x] **LoRaWAN-Uplink (ABP, Einkanal-Testgateway)**: Tracker → T-Beam → ChirpStack → MQTT → Bridge → Home Assistant; Codec dekodiert die Nutzdaten. Details in [05-lorawan-chirpstack.md](05-lorawan-chirpstack.md), Abschnitt 10
+- [x] Antenne am Tracker angeschlossen; der Nahbereichsempfang belegt, dass der Sender arbeitet, aber nicht die Reichweite
+
+Offen in diesem Bereich: OTAA-Join mit einem echten Multi-Channel-Gateway, Reichweite, SD-Karte zusammen mit dem Display (beide nutzen HSPI), Akkumessung (Anzeige 0 mV ohne Akku, Skalierung ungeprüft).
+
 ## Aus Hersteller-/Projektunterlagen plausibilisiert
 
 - [x] Heltec-V1.1-Familie: ESP32-S3FN8 + SX1262 + UC6580

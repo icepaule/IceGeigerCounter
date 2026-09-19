@@ -153,6 +153,7 @@ flowchart LR
 3. [Firmware](docs/v2/03-firmware.md)
 4. [Offline-Logging/Backfill](docs/v2/04-mobile-logging-sync.md)
 5. [LoRaWAN/ChirpStack](docs/v2/05-lorawan-chirpstack.md)
+   - [ChirpStack als Docker-Stack (integrations/chirpstack)](integrations/chirpstack/README.md)
 6. [Home Assistant](docs/v2/06-home-assistant.md)
 7. [Field Case / OpenSCAD / STL](docs/v2/07-enclosure.md)
 8. [Assembly](docs/v2/08-assembly.md)
