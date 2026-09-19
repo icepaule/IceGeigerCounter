@@ -33,6 +33,8 @@ uint16_t userChannelsMask[6]={0x00FF,0,0,0,0,0};
 LoRaMacRegion_t loraWanRegion=ACTIVE_REGION; DeviceClass_t loraWanClass=CLASS_A;
 bool overTheAirActivation=true, loraWanAdr=true, isTxConfirmed=false;
 uint8_t appPort=2, confirmedNbTrials=1;
+uint32_t appTxDutyCycle=LORA_MOBILE_MS;   // required by Heltec LoRaWan_APP (extern in LoRaWan_APP.h)
+bool loraEnabled=false;                     // only transmit once an AppKey is provisioned (never TX with all-zero keys / possibly no antenna)
 
 void IRAM_ATTR tubeImpulse(){ pulseTotal++; }
 uint32_t unixFromGps(){
@@ -93,10 +95,11 @@ void setup(){
   pinMode(VBAT_PIN,INPUT);
   Serial1.begin(115200,SERIAL_8N1,33,34); pinMode(3,OUTPUT); digitalWrite(3,HIGH);
   sdSpi.begin(SD_SCK,SD_MISO,SD_MOSI,SD_CS); sdOK=SD.begin(SD_CS,sdSpi,8000000); if(sdOK&&!SD.exists("/icegeiger"))SD.mkdir("/icegeiger");
-  copyLoRaSecrets(); Mcu.begin(HELTEC_BOARD,SLOW_CLK_TPYE); ensureWifi();
+  copyLoRaSecrets(); for(uint8_t i=0;i<16;i++) if(appKey[i]) loraEnabled=true;
+  Mcu.begin(HELTEC_BOARD,SLOW_CLK_TPYE); ensureWifi();
 }
 void loop(){
-  feedGps(); ensureWifi(); ensureMqtt(); if(mqtt.connected())mqtt.loop(); serviceLoRa();
+  feedGps(); ensureWifi(); ensureMqtt(); if(mqtt.connected())mqtt.loop(); if(loraEnabled) serviceLoRa();
   if(millis()-lastLog>=LOG_MS){ lastLog+=LOG_MS; uint32_t now=pulseTotal; uint16_t counts=(uint16_t)min(now-lastPulseTotal,65535UL); lastPulseTotal=now; buckets[bucketPos]=counts; bucketPos=(bucketPos+1)%6; seq++;
     String j=measurementJson(counts,cpm60()); appendLog(j); if(mqtt.connected()){ String t=String("icegeiger/")+DEVICE_ID+"/live"; mqtt.publish(t,j,false,1); backfill(); }
   }
