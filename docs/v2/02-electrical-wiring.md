@@ -22,6 +22,8 @@ Für die reale Tracker-Familie wird **GPIO17** verwendet.
 
 Bei 5 V Eingang liefert der ideale Teiler etwa 3,33 V. Vor Anschluss den realen INT-Pegel des gelieferten GC-1602 messen. Gezählt wird auf der **fallenden Flanke**.
 
+Gemessen (19.09.2026, Nano-Pin D2 gegen GND, USB-Versorgung über den Nano): Ruhepegel **4,39 V**. Der Teiler liefert dann ca. 2,93 V am GPIO (ESP32-S3: High ab etwa 2,5 V, maximal 3,6 V). Bei 5,0 V Schienenspannung sind es 3,33 V, bei 5,25 V ca. 3,5 V. Der Pegel folgt der Versorgung; deshalb nach dem Umstieg auf das Battery Shield erneut messen.
+
 ## microSD
 
 | microSD SPI | Tracker |

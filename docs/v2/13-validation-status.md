@@ -20,6 +20,7 @@
 - [x] Nano meldet sich am Linux-Host als CH340 (`1a86:7523`, `ch341-uart`) und erscheint als `/dev/ttyUSB1`
 - [x] Die gelieferte Firmware gibt **nichts über Serial** aus: 65 s bei 9600 Baud, 12 s bei 115200 Baud und 15 s bei 57600 Baud ergaben jeweils 0 Bytes. Der Upstream-Sketch ([WinHGGG/Geiger-Counter-v1.3-LCD-CAJOE](https://github.com/WinHGGG/Geiger-Counter-v1.3-LCD-CAJOE)) hat `Serial.begin` auskommentiert. Die Impulse müssen daher direkt am INT-Pin abgegriffen werden (Tracker-Pfad, siehe [02-electrical-wiring.md](02-electrical-wiring.md)); ohne Neuflashen des Nano ist der USB-Anschluss dafür nicht nutzbar.
 - [x] Der Upstream-Sketch zählt Impulse über INT0 (Nano D2) auf der fallenden Flanke, misst in 15-s-Fenstern und rechnet `µSv/h = CPM / 151`. Das ist die Upstream-Referenz; die Firmware der gelieferten Einheit wurde nicht ausgelesen.
+- [x] **INT-Ruhepegel:** Multimeter (DC) zwischen Nano-Pin D2 und GND zeigt **4,39 V**, bei USB-Versorgung über den Nano und ohne angeschlossene Last. Der Ruhepegel ist High (5-V-Logik, der Wert liegt unter 5 V, weil er der Versorgung folgt). Das Multimeter mittelt bei niedriger Zählrate über kurze Low-Impulse, der Wert entspricht daher dem Ruhepegel. Mit dem 10-kΩ/20-kΩ-Teiler ergibt das ca. **2,93 V** am GPIO. Das liegt über der ESP32-S3-Schwelle für High von 0,75 × VDD (etwa 2,5 V bei 3,3 V, [Datenblatt](https://documentation.espressif.com/esp32-s3_datasheet_en.html)) und unter dem Grenzwert von VDD + 0,3 V (3,6 V). Der Pegel folgt der 5-V-Schiene und muss beim Betrieb am Battery Shield erneut gemessen werden.
 
 Hinweis: Die Röhre im GC-1602-NANO ist laut Upstream-Beschreibung eine J305. Der Faktor 151 ist ein Standardwert und keine Kalibrierung dieser Einheit; siehe [10-calibration-data-quality.md](10-calibration-data-quality.md).
 
@@ -51,7 +52,7 @@ Hinweis: Die Röhre im GC-1602-NANO ist laut Upstream-Beschreibung eine J305. De
 - [ ] GC-Lochabstände und Lochdurchmesser
 - [ ] reale GC-Bauhöhe / LCD-Position
 - [ ] Zählrohr-Aufschrift und Rohrmittelpunkt
-- [ ] realer INT-Ruhe-/Pulspegel
+- [ ] realer INT-Pulspegel (Low-Pegel und Pulsform, z. B. mit Oszilloskop oder Logikanalysator); der Ruhepegel ist gemessen, siehe oben
 - [ ] Battery-Shield 5-V-Ausgang unter Last
 - [ ] Battery-Shield NORMAL/HOLD/Ruhestrom
 - [ ] CPM→µSv/h-Faktor
