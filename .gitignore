@@ -23,3 +23,11 @@ __pycache__/
 # OpenSCAD temporary output
 *.csg
 *.echo
+
+# ChirpStack deployment secrets / generated device keys
+integrations/chirpstack/.env
+integrations/chirpstack/geiger_device.json
+firmware/tbeam_singlechannel_gateway/secrets.h
+
+# Local compiler output (contains compiled-in credentials)
+firmware/**/build/

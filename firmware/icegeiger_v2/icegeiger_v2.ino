@@ -9,6 +9,9 @@
 #include "secrets.h"
 #include "HT_st7735.h"        // Heltec driver for the on-board 0.96" ST7735 TFT (160x80)
 
+#ifndef ICEGEIGER_LORAWAN_ABP
+#define ICEGEIGER_LORAWAN_ABP 0   // 1 = ABP (uplink-only tests against a single-channel gateway), 0 = OTAA
+#endif
 #if !defined(ICEGEIGER_SECRETS_CONFIGURED) || ICEGEIGER_SECRETS_CONFIGURED != 1
 #error "Copy secrets.example.h to secrets.h, fill locally and set ICEGEIGER_SECRETS_CONFIGURED to 1"
 #endif
@@ -18,7 +21,11 @@ static const char DEVICE_ID[]="icegeiger-v2";
 static const int GC_INT_PIN=17;                 // GPIO47 is Boot_Mode on Heltec V1.1-family
 static const int VBAT_PIN=1;
 static const int SD_SCK=4, SD_MISO=5, SD_MOSI=6, SD_CS=7;
+#ifdef ICEGEIGER_LORA_TEST_INTERVAL_MS     // test builds only: shorter uplink interval (stay below 1 % duty cycle)
+static const uint32_t LOG_MS=10000, LORA_MOBILE_MS=ICEGEIGER_LORA_TEST_INTERVAL_MS, LORA_HOME_MS=ICEGEIGER_LORA_TEST_INTERVAL_MS;
+#else
 static const uint32_t LOG_MS=10000, LORA_MOBILE_MS=120000, LORA_HOME_MS=900000;
+#endif
 static const float CPM_PER_USVH=151.0f;         // provisional: verify delivered tube before dose interpretation
 static const float VBAT_SCALE=4.9f;             // Heltec docs: VBAT = Vbat_Read * 4.9
 static const char *LOGFILE="/icegeiger/log.ndjson", *CURSORFILE="/icegeiger/sync.cursor";
@@ -97,7 +104,15 @@ static void prepareTxFrame(uint8_t port){
   packI32(appData,i,gps.location.isValid()?(int32_t)llround(gps.location.lat()*1e7):0); packI32(appData,i,gps.location.isValid()?(int32_t)llround(gps.location.lng()*1e7):0);
   appData[i++]=gps.satellites.isValid()?min((uint32_t)gps.satellites.value(),255UL):0; appData[i++]=gps.hdop.isValid()?min((int)lround(gps.hdop.hdop()*10),255):0; packU16(appData,i,readBatteryMv()); appDataSize=i;
 }
-void copyLoRaSecrets(){ memcpy(devEui,ICEGEIGER_DEV_EUI,8); memcpy(appEui,ICEGEIGER_JOIN_EUI,8); memcpy(appKey,ICEGEIGER_APP_KEY,16); }
+void copyLoRaSecrets(){
+  memcpy(devEui,ICEGEIGER_DEV_EUI,8); memcpy(appEui,ICEGEIGER_JOIN_EUI,8); memcpy(appKey,ICEGEIGER_APP_KEY,16);
+#if ICEGEIGER_LORAWAN_ABP
+  // ABP: no join, fixed single channel (868.1 MHz), fixed DR3 (SF9/125 kHz), ADR off. For a single-channel gateway only.
+  overTheAirActivation=false; loraWanAdr=false; devAddr=ICEGEIGER_DEV_ADDR;
+  memcpy(nwkSKey,ICEGEIGER_NWK_S_KEY,16); memcpy(appSKey,ICEGEIGER_APP_S_KEY,16);
+  userChannelsMask[0]=0x0001;
+#endif
+}
 void serviceLoRa(){
   static uint32_t interval=LORA_MOBILE_MS;
   switch(deviceState){
@@ -116,7 +131,12 @@ void setup(){
   tft.st7735_init(); tft.st7735_fill_screen(ST7735_BLACK); tftRow(0,ST7735_WHITE,"IceGeiger V2 boot");   // TFT init also sets GPIO3 (shared Vext) HIGH
   Serial1.begin(115200,SERIAL_8N1,33,34); pinMode(3,OUTPUT); digitalWrite(3,HIGH);
   sdSpi.begin(SD_SCK,SD_MISO,SD_MOSI,SD_CS); sdOK=SD.begin(SD_CS,sdSpi,8000000); if(sdOK&&!SD.exists("/icegeiger"))SD.mkdir("/icegeiger");
-  copyLoRaSecrets(); for(uint8_t i=0;i<16;i++) if(appKey[i]) loraEnabled=true;
+  copyLoRaSecrets(); 
+#if ICEGEIGER_LORAWAN_ABP
+  loraEnabled=(devAddr!=0);
+#else
+  for(uint8_t i=0;i<16;i++) if(appKey[i]) loraEnabled=true;
+#endif
   Mcu.begin(HELTEC_BOARD,SLOW_CLK_TPYE); ensureWifi();
 }
 void loop(){
