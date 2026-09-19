@@ -30,9 +30,10 @@ def normalize_chirp(p):
 def discovery(c,dev):
  if dev in seen:return
  seen.add(dev); ident=dev.replace('-','_')
- sensors=[('cpm','CPM','cpm_60s','cpm'),('usvh','Dose rate','usvh','µSv/h'),('satellites','GNSS satellites','satellites',None)]
+ sensors=[('cpm','CPM','cpm_60s','cpm'),('usvh','Dose rate','usvh','µSv/h'),('satellites','GNSS satellites','satellites',None),('battery','Battery voltage','battery_mv','mV'),('hdop','GNSS HDOP','hdop',None)]
  for suffix,name,key,unit in sensors:
   cfg={'name':f'IceGeiger {name}','unique_id':f'{ident}_{suffix}','state_topic':f'icegeiger_ha/{dev}/state','value_template':f'{{{{ value_json.{key} }}}}','device':{'identifiers':[dev],'name':f'IceGeiger {dev}','manufacturer':'DIY','model':'IceGeiger V2'}}
+  cfg['state_class']='measurement'
   if unit:cfg['unit_of_measurement']=unit
   c.publish(f'{HA}/sensor/{ident}_{suffix}/config',json.dumps(cfg),qos=1,retain=True)
  tr={'name':f'IceGeiger {dev}','unique_id':f'{ident}_tracker','json_attributes_topic':f'icegeiger_ha/{dev}/location','source_type':'gps','device':{'identifiers':[dev],'name':f'IceGeiger {dev}'}}
@@ -61,7 +62,7 @@ def on_message(c,u,m):
   discovery(c,dev);write_influx(dev,d,transport)
   if live:
    c.publish(f'icegeiger_ha/{dev}/state',json.dumps(d),qos=1,retain=True)
-   if d.get('lat') is not None and d.get('lon') is not None:
+   if d.get('lat') is not None and d.get('lon') is not None and (d['lat'] or d['lon']):   # LoRaWAN payload carries 0/0 without a GNSS fix
     loc={'latitude':d['lat'],'longitude':d['lon'],'gps_accuracy':max(1,int(float(d.get('hdop',1))*5))};c.publish(f'icegeiger_ha/{dev}/location',json.dumps(loc),qos=1,retain=True)
  except Exception as e: print('bridge error',m.topic,e,flush=True)
 

@@ -1,12 +1,59 @@
-type: vertical-stack
-cards:
-  - type: entities
-    title: IceGeiger V2
-    entities:
-      - sensor.icegeiger_cpm
-      - sensor.icegeiger_usvh
-      - sensor.icegeiger_gnss_satellites
-  - type: map
-    entities:
-      - device_tracker.icegeiger_v2
-    hours_to_show: 6
+# IceGeiger V2 - Home Assistant dashboard (Lovelace, complete config with one view).
+# Entity IDs assume the names produced by integrations/home-assistant/setup_entities.py
+# (renames the MQTT-discovery entities of the bridge to short IDs).
+title: IceGeiger
+views:
+  - title: Übersicht
+    path: uebersicht
+    icon: mdi:radioactive
+    cards:
+      - type: entities
+        title: IceGeiger V2 – Live
+        entities:
+          - entity: sensor.icegeiger_cpm
+          - entity: sensor.icegeiger_usvh
+          - entity: sensor.icegeiger_gnss_satellites
+          - entity: sensor.icegeiger_gnss_hdop
+          - entity: sensor.icegeiger_battery_mv
+      - type: conditional
+        conditions:
+          - condition: state
+            entity: sensor.icegeiger_cpm
+            state_not: unavailable
+          - condition: state
+            entity: sensor.icegeiger_cpm
+            state_not: unknown
+        card:
+          type: gauge
+          entity: sensor.icegeiger_cpm
+          name: CPM (60 s)
+          min: 0
+          max: 60
+          severity:
+            green: 0
+            yellow: 30
+            red: 45
+      - type: history-graph
+        title: CPM und Dosisleistung (24 h)
+        hours_to_show: 24
+        entities:
+          - entity: sensor.icegeiger_cpm
+          - entity: sensor.icegeiger_usvh
+      - type: history-graph
+        title: Akku und GNSS (24 h)
+        hours_to_show: 24
+        entities:
+          - entity: sensor.icegeiger_battery_mv
+          - entity: sensor.icegeiger_gnss_satellites
+      - type: map
+        title: Position
+        hours_to_show: 6
+        entities:
+          - entity: device_tracker.icegeiger_v2
+      - type: markdown
+        title: Hinweis zur Messung
+        content: >
+          **CPM** (Impulse pro Minute) ist der Primärmesswert. **µSv/h** ist eine
+          röhrenabhängige Ableitung mit dem Standardfaktor 151 CPM je µSv/h und
+          **nicht kalibriert**. Typische natürliche Hintergrundstrahlung in
+          Deutschland liegt bei 0,05 bis 0,2 µSv/h.
