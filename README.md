@@ -161,6 +161,7 @@ flowchart LR
 11. [Schuppenbetrieb](docs/v2/11-shed-operation.md)
 12. [Quellen](docs/v2/12-sources.md)
 13. [Validierungsstatus](docs/v2/13-validation-status.md)
+14. [Sicherheitsregeln & Strahlungsgrundlagen (Einheiten, Grenzwerte, Entladen der Hochspannung)](docs/07-safety-and-radiation-basics.md)
 
 ## CAD
 

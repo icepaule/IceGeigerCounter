@@ -1,5 +1,7 @@
 # Selbstgebaute Hochspannungsschaltung (HV-Generator)
 
+> **Nicht Teil von V2.** Mit dem gelieferten GC-1602-NANO-Bausatz (fertige Hochspannungserzeugung und J305-Röhre) wird diese Eigenbauschaltung nicht gebaut. Das Dokument bleibt als historische V1-Referenz erhalten. Die aktuellen Sicherheitsregeln stehen in [07-safety-and-radiation-basics.md](07-safety-and-radiation-basics.md).
+
 ## ⚠️ Sicherheitshinweis – zuerst lesen
 
 Diese Schaltung erzeugt intern **ca. 400 V Gleichspannung** zur Versorgung der Geiger-Müller-Röhre.

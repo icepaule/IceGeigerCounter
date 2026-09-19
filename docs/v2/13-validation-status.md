@@ -12,6 +12,17 @@
 - [x] Battery Shield real gemessen: **100,2 × 48,0 mm**
 - [x] unterseitiges Shield-Bauteil mit ca. **5 mm** Höhe in CAD berücksichtigt
 
+## Real verifiziert – GC-1602-NANO Bausatz (19.09.2026)
+
+- [x] GC-1602-NANO Bausatz geliefert und läuft eigenständig über den Nano-USB-Anschluss
+- [x] LCD zeigt CPM und µSv/h
+- [x] Piezo klickt bei Impulsen
+- [x] Nano meldet sich am Linux-Host als CH340 (`1a86:7523`, `ch341-uart`) und erscheint als `/dev/ttyUSB1`
+- [x] Die gelieferte Firmware gibt **nichts über Serial** aus: 65 s bei 9600 Baud, 12 s bei 115200 Baud und 15 s bei 57600 Baud ergaben jeweils 0 Bytes. Der Upstream-Sketch ([WinHGGG/Geiger-Counter-v1.3-LCD-CAJOE](https://github.com/WinHGGG/Geiger-Counter-v1.3-LCD-CAJOE)) hat `Serial.begin` auskommentiert. Die Impulse müssen daher direkt am INT-Pin abgegriffen werden (Tracker-Pfad, siehe [02-electrical-wiring.md](02-electrical-wiring.md)); ohne Neuflashen des Nano ist der USB-Anschluss dafür nicht nutzbar.
+- [x] Der Upstream-Sketch zählt Impulse über INT0 (Nano D2) auf der fallenden Flanke, misst in 15-s-Fenstern und rechnet `µSv/h = CPM / 151`. Das ist die Upstream-Referenz; die Firmware der gelieferten Einheit wurde nicht ausgelesen.
+
+Hinweis: Die Röhre im GC-1602-NANO ist laut Upstream-Beschreibung eine J305. Der Faktor 151 ist ein Standardwert und keine Kalibrierung dieser Einheit; siehe [10-calibration-data-quality.md](10-calibration-data-quality.md).
+
 ## Aus Hersteller-/Projektunterlagen plausibilisiert
 
 - [x] Heltec-V1.1-Familie: ESP32-S3FN8 + SX1262 + UC6580

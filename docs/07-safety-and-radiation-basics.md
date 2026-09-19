@@ -4,16 +4,32 @@ Dieses Dokument fasst alle Sicherheitsregeln für Bau und Betrieb an einer Stell
 
 ## Teil A: Sicherheitsregeln
 
-### A1. Hochspannungsschaltung (~400V)
+### A1. Hochspannung (GC-1602-Board bzw. Eigenbau-HV-Schaltung)
 
-Die selbstgebaute HV-Schaltung (siehe [06-hv-circuit.md](06-hv-circuit.md)) erzeugt intern ca. 400V Gleichspannung.
+Das GC-1602-NANO-Board (CAJOE-Typ) erzeugt für die Röhre mehrere hundert Volt Gleichspannung (Anbieterangabe für J305: Anodenspannung 350–480 V, Upstream-Doku: "500 V+"). Die Energie ist gering, ein Schlag ist trotzdem schmerzhaft und kann Schreckreaktionen mit Folgeunfällen auslösen. Das gilt ebenso für die frühere Eigenbau-Schaltung ([06-hv-circuit.md](06-hv-circuit.md), nicht Teil von V2).
 
-- **Niemals** an Schaltungsteile fassen, während die Schaltung an Spannung liegt.
-- Vor jeder Berührung/Messung/Umbau: Spannungsquelle trennen **und** den Speicherkondensator aktiv entladen (z.B. über einen Widerstand ~100 kΩ, nicht direkt kurzschließen – ein Kurzschluss kann den Kondensator beschädigen und erzeugt einen gefährlichen Funken).
-- **Ein-Hand-Regel:** Beim Messen unter Spannung nur eine Hand verwenden, die andere in die Tasche – verhindert einen Stromfluss durch den Brustkorb, falls doch versehentlich Kontakt entsteht.
-- Aufbau auf Lochrasterplatine mit ausreichend Kriechstrecke zwischen 400V-führenden Leiterbahnen, nicht auf offenem Steckbrett im Dauerbetrieb.
-- Vor Anschluss der Röhre die HV-Ausgangsspannung mit einem Multimeter (Hochspannungstastkopf, min. 600V-Bereich) prüfen.
-- Fertig aufgebautes Gerät im Gehäuse: keine berührbaren HV-Kontakte nach außen führen.
+**Grundsatz: Erden ist hier nicht die Schutzmaßnahme.** Das Gerät ist ein potentialfreies Niederspannungsgerät (USB oder Akku). Geschützt wird durch **Trennen, Warten und Entladen**, nicht durch Erdung:
+
+- Weder das Board noch den eigenen Körper an Schutzleiter, Heizkörper, PC-Gehäuse o. Ä. legen. Das würde einen Strompfad von den HV-Knoten durch den Körper zur Erde schaffen.
+- Bei angestecktem USB liegt die Masse des Boards über den PC und dessen Netzteil meist auf Erdpotenzial. Deshalb nie am Board arbeiten, solange USB angeschlossen ist.
+- Ein ESD-Armband ist nur für Niederspannungsteile im stromlosen Zustand gedacht und nur mit 1 MΩ Serienwiderstand. Nie bei Arbeiten an den HV-Knoten tragen.
+
+**Ablauf vor jedem Berühren, Messen oder Umbauen:**
+
+1. Alle Quellen trennen: USB (Nano, Tracker), Battery Shield und Akkus.
+2. Mindestens 1 Minute warten. Die reale Entladezeit dieses Boards ist nicht gemessen.
+3. Board auf isolierende Unterlage legen (Holz oder Kunststoff, keine Metallfläche).
+4. Aktiv entladen mit einer Entladeprüfspitze: 1 MΩ, aufgebaut aus zwei 470-kΩ-Widerständen (0,5 W) in Reihe, weil ein einzelner 0,25-W-Widerstand oft nur für etwa 250 V spezifiziert ist, an isoliertem Griff. Ein Ende zuerst per Krokoklemme an die **Board-Masse (GND) des Geräts** klemmen, dann einhändig mit dem anderen Ende den Röhrenanschluss (Anode) und die HV-Knoten berühren. Nicht mit einem Schraubendreher kurzschließen (Funke, Bauteilschaden).
+5. Nachmessen: Multimeter auf DC, Bereich mindestens 600 V, zwischen Anodenanschluss und Board-GND. Erst wenn etwa 0 V angezeigt werden, weiterarbeiten.
+6. Röhre und Lötseite auch danach nur an isolierten Stellen anfassen.
+
+**Im Betrieb:**
+
+- Nichts an Röhrenanschlüssen, Lötseite oder HV-Bereich berühren.
+- **Ein-Hand-Regel:** Wenn unter Spannung gemessen werden muss, nur eine Hand verwenden, die andere in die Tasche. Das verhindert einen Stromfluss durch den Brustkorb.
+- Im Gehäuse keine berührbaren HV-Kontakte nach außen führen.
+
+Empfohlene Messung für den Testplan: Restspannung am Röhrenanschluss nach dem Abschalten in festen Abständen (z. B. nach 5, 15, 30, 60 s) protokollieren. Damit wird die reale Entladezeit dokumentiert.
 
 ### A2. Akku (18650 Li-Ion)
 
@@ -45,7 +61,7 @@ Falls trotzdem eine Prüfquelle zum Testen verwendet werden soll (z.B. ein altes
 | Äquivalent-/effektive Dosis (biologische Wirkung) | Sievert (Sv) | Rem | 1 Sv = 100 rem | Energiedosis gewichtet mit einem Faktor je Strahlungsart (α, β, γ wirken biologisch unterschiedlich stark) |
 | **CPM** (Counts Per Minute) | – (kein SI, Rohmesswert) | – | geräte-/röhrenspezifischer Kalibrierfaktor nötig | Reine Impulszählrate der GM-Röhre; erst mit einem Umrechnungsfaktor (CPM pro µSv/h) in eine Dosisleistung umrechenbar |
 
-**Wichtig für dieses Projekt:** Der CPM→µSv/h-Umrechnungsfaktor ist **röhrenspezifisch**. Für die ursprünglich geplante J305/SBM-20-Röhre kursiert häufig ein Faktor von ca. 151–154 CPM = 1 µSv/h – dieser Wert gilt **nicht automatisch** für die jetzt geplante STS-6-Röhre (kein verifizierter Datenblattwert gefunden). Vor einer aussagekräftigen Anzeige in µSv/h sollte der Faktor entweder aus dem Datenblatt der tatsächlich verbauten Röhre entnommen oder durch Vergleich mit einem kalibrierten Referenzgerät ermittelt werden. Bis dahin zeigt das Gerät zuverlässig **CPM** an, die µSv/h-Umrechnung ist als vorläufig zu behandeln.
+**Wichtig für dieses Projekt:** Der CPM→µSv/h-Umrechnungsfaktor ist **röhrenspezifisch**. Das GC-1602-NANO verwendet laut Upstream-Beschreibung eine J305-Röhre; die Upstream-Firmware rechnet mit **151 CPM = 1 µSv/h**. Für J305/SBM-20-Röhren kursieren Faktoren von etwa 151–154. Das ist ein Standardwert und **keine Kalibrierung dieser Einheit**: Die Empfindlichkeit hängt von Röhre, Strahlungsart und -energie ab. Für eine belastbare Anzeige in µSv/h muss der Faktor durch Vergleich mit einem kalibrierten Referenzgerät ermittelt werden (siehe [10-calibration-data-quality.md](v2/10-calibration-data-quality.md)). Bis dahin ist **CPM** der Primärmesswert, die µSv/h-Umrechnung ist vorläufig. (Die frühere Planung mit einer STS-6-Röhre ist mit V2 entfallen; für diese Röhre wurde kein Datenblattfaktor gefunden.)
 
 Am gebräuchlichsten in der Praxis: **µSv/h** (mikrosievert pro Stunde) für die aktuelle Dosisleistung, **mSv/Jahr** (millisievert pro Jahr) für die Langzeit-/Jahresdosis.
 
