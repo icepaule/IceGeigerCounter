@@ -141,11 +141,14 @@ Quelle: [firmware/tbeam_singlechannel_gateway](../../firmware/tbeam_singlechanne
 - erkennt Netz-/Funkbaustein selbst (getestet: **T-Beam v1.2, AXP2101, SX1276, 868 MHz**),
 - Gateway-EUI wird aus der WLAN-MAC gebildet (`xx:xx:xx:ff:fe:xx:xx:xx`) und muss in ChirpStack als Gateway angelegt sein,
 - leitet Frames als Semtech-UDP `PUSH_DATA` weiter, sendet `PULL_DATA` als Keep-alive und alle 30 s Statistik.
+- zeigt auf einem optionalen 0,96"-OLED (SSD1306, I2C 0x3C am PMU-Bus) WLAN/IP, Bridge-Status (ACK-basiert), RX-/Forward-Zähler, RSSI/SNR und Laufzeit; ohne OLED läuft das Gateway headless weiter. Benötigt die Arduino-Bibliotheken Adafruit GFX und Adafruit SSD1306.
 
 Bekannte Fallen, die beim Test aufgetreten sind:
 
 - `WiFi.macAddress()` liefert vor dem Start des WLAN-Stacks nur Nullen; die EUI muss über `esp_read_mac` gebildet werden.
 - Die Frequenz muss als `868.1` (double) im JSON stehen. Als `float` ergibt sich `868.099976` und ChirpStack meldet `No channel found for frequency`.
+- `strftime` lieferte im Zeitstempel der Statistik kein Komma nach `"time":"… GMT"`, die Gateway Bridge verwarf jedes Statistikpaket (`could not handle packet`) und ChirpStack zeigte das Gateway offline, obwohl Uplinks weitergeleitet wurden. Der Zeitstempel wird deshalb mit `snprintf` gebaut.
+- Die Gateway-Statistik auf `eu868/gateway/+/event/stats` ist Protobuf. Die Bridge (`integrations/bridge`) wertet nur die Aktivität aus und legt in Home Assistant `Gateway online` und `Gateway letzter Kontakt` per MQTT Discovery an.
 
 **Meshtastic-Gateway sichern und wiederherstellen:** Wird ein T-Beam mit Meshtastic dafür überschrieben, vorher ein vollständiges Flash-Abbild und den Konfigurationsexport sichern (`esptool read-flash 0 0x400000 backup.bin`, `meshtastic --export-config`). Die Dateien enthalten Kanalschlüssel und gehören nicht ins Repository. Wiederherstellung: `esptool write-flash 0 backup.bin`.
 

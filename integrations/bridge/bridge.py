@@ -39,6 +39,17 @@ def discovery(c,dev):
  tr={'name':f'IceGeiger {dev}','unique_id':f'{ident}_tracker','json_attributes_topic':f'icegeiger_ha/{dev}/location','source_type':'gps','device':{'identifiers':[dev],'name':f'IceGeiger {dev}'}}
  c.publish(f'{HA}/device_tracker/{ident}/config',json.dumps(tr),qos=1,retain=True)
 
+def gateway_stats(c,gw):
+ ident='chirpstack_gw_'+gw
+ if gw not in seen:
+  seen.add(gw); dev={'identifiers':['chirpstack_gw_'+gw],'name':f'LoRa-Gateway {gw}','manufacturer':'LILYGO','model':'T-Beam Einkanal-Gateway (ChirpStack)'}
+  on={'name':'Gateway online','unique_id':ident+'_online','state_topic':f'icegeiger_ha/gateway/{gw}/online','payload_on':'ON','off_delay':150,'device_class':'connectivity','device':dev}
+  ts={'name':'Gateway letzter Kontakt','unique_id':ident+'_last_seen','state_topic':f'icegeiger_ha/gateway/{gw}/last_seen','device_class':'timestamp','device':dev}
+  c.publish(f'{HA}/binary_sensor/{ident}_online/config',json.dumps(on),qos=1,retain=True)
+  c.publish(f'{HA}/sensor/{ident}_last_seen/config',json.dumps(ts),qos=1,retain=True)
+ c.publish(f'icegeiger_ha/gateway/{gw}/online','ON',qos=1)
+ c.publish(f'icegeiger_ha/gateway/{gw}/last_seen',datetime.datetime.now(datetime.timezone.utc).isoformat(timespec='seconds'),qos=1,retain=True)
+
 def write_influx(dev,d,transport):
  if not write_api or Point is None:return
  p=Point('radiation').tag('device',dev).field('transport',transport)
@@ -51,10 +62,12 @@ def write_influx(dev,d,transport):
  write_api.write(bucket=IB,org=IO,record=p)
 
 def on_connect(c,u,flags,reason,props=None):
- c.subscribe('icegeiger/+/live',qos=1);c.subscribe('icegeiger/+/history',qos=1);c.subscribe('application/+/device/+/event/up',qos=1)
+ c.subscribe('icegeiger/+/live',qos=1);c.subscribe('icegeiger/+/history',qos=1);c.subscribe('application/+/device/+/event/up',qos=1);c.subscribe('eu868/gateway/+/event/stats',qos=0)
 
 def on_message(c,u,m):
  try:
+  if m.topic.startswith('eu868/gateway/'):
+   gateway_stats(c,m.topic.split('/')[2]);return
   if m.topic.startswith('application/'):
    dev,d=normalize_chirp(m.payload);transport='lorawan';live=True
   else:

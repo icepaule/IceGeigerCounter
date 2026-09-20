@@ -9,6 +9,8 @@
 #include <SPI.h>
 #include <RadioLib.h>
 #include <XPowersLib.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
 #include <mbedtls/base64.h>
 #include <esp_mac.h>
 #include "secrets.h"
@@ -34,6 +36,8 @@ SX1276 *r76 = nullptr; SX1262 *r62 = nullptr;
 WiFiUDP udp; IPAddress bridgeIp;
 uint8_t gwEui[8]; uint16_t token = 1;
 volatile bool rxFlag = false;
+Adafruit_SSD1306 oled(128, 64, &Wire, -1); bool oledOk = false;   // optional 0.96" SSD1306 on the PMU I2C bus
+float lastRssi = 0, lastSnr = 0; uint32_t lastRxMs = 0, lastAckMs = 0, lastDraw = 0;
 uint32_t rxnb = 0, rxok = 0, rxfw = 0, lastPull = 0, lastStat = 0, lastWifiTry = 0;
 
 void IRAM_ATTR onRx() { rxFlag = true; }
@@ -50,6 +54,21 @@ bool initPower() {
     Serial.println("PMU: AXP192 (T-Beam v1.0/1.1), LDO2=3.3V LoRa"); return true;
   }
   Serial.println("PMU: none found (continuing, LoRa may be unpowered)"); return false;
+}
+
+void drawStatus() {
+  if (!oledOk) return;
+  bool wifi = WiFi.status() == WL_CONNECTED, bridge = lastAckMs && millis() - lastAckMs < 20000;
+  oled.clearDisplay(); oled.setTextSize(1); oled.setTextColor(SSD1306_WHITE);
+  oled.setCursor(0, 0); oled.print("IceGeiger GW  "); oled.print(bridge ? "ONLINE" : "OFFLINE");
+  oled.setCursor(0, 11); oled.printf("WiFi %s", wifi ? WiFi.localIP().toString().c_str() : "verbinde...");
+  oled.setCursor(0, 22); oled.printf("Bridge %s", bridge ? "OK (ACK)" : "keine Antwort");
+  oled.setCursor(0, 33); oled.printf("RX %lu  fwd %lu", (unsigned long)rxnb, (unsigned long)rxfw);
+  oled.setCursor(0, 44);
+  if (lastRxMs) oled.printf("%.0fdBm SNR%.1f vor %lus", lastRssi, lastSnr, (unsigned long)((millis() - lastRxMs) / 1000));
+  else oled.print("noch kein Paket");
+  oled.setCursor(0, 55); oled.printf("868.1MHz SF%u up %luh%02lum", SF, (unsigned long)(millis() / 3600000UL), (unsigned long)(millis() / 60000UL % 60));
+  oled.display();
 }
 
 bool initRadio() {
@@ -86,7 +105,7 @@ void handleRx() {
   float rssi = r76 ? r76->getRSSI() : r62->getRSSI(), snr = r76 ? r76->getSNR() : r62->getSNR();
   if (r76) r76->startReceive(); else r62->startReceive();
   if (st != RADIOLIB_ERR_NONE) { Serial.printf("rx error %d (len %d)\n", st, len); return; }
-  rxok++;
+  rxok++; lastRssi = rssi; lastSnr = snr; lastRxMs = millis();
   char b64[400]; size_t ol = 0; mbedtls_base64_encode((unsigned char *)b64, sizeof(b64) - 1, &ol, data, len); b64[ol] = 0;
   char json[700];
   snprintf(json, sizeof(json),
@@ -99,7 +118,10 @@ void handleRx() {
 void setup() {
   Serial.begin(115200); delay(1500);
   Serial.println("IceGeiger T-Beam single-channel gateway");
-  initPower(); bool radioOk = initRadio();
+  initPower();
+  oledOk = oled.begin(SSD1306_SWITCHCAPVCC, 0x3C);   // no OLED fitted: begin() fails and the gateway runs headless
+  Serial.printf("OLED: %s\n", oledOk ? "SSD1306 ok" : "not found");
+  bool radioOk = initRadio();
   ensureWifi();
   uint8_t mac[6]; esp_read_mac(mac, ESP_MAC_WIFI_STA);   // WiFi.macAddress() returns zeros before the WiFi stack is up
   gwEui[0] = mac[0]; gwEui[1] = mac[1]; gwEui[2] = mac[2]; gwEui[3] = 0xFF; gwEui[4] = 0xFE; gwEui[5] = mac[3]; gwEui[6] = mac[4]; gwEui[7] = mac[5];
@@ -114,14 +136,15 @@ void loop() {
   if (WiFi.status() == WL_CONNECTED) {
     if (millis() - lastPull > PULL_MS) { lastPull = millis(); sendPacket(0x02, nullptr); }   // PULL_DATA keep-alive
     if (millis() - lastStat > STAT_MS) {
-      lastStat = millis(); char json[200], ts[32] = "";
+      lastStat = millis(); char json[240], ts[48] = "";
       time_t now = time(nullptr);
-      if (now > 1700000000) { struct tm tmv; gmtime_r(&now, &tmv); strftime(ts, sizeof(ts), "\"time\":\"%Y-%m-%d %H:%M:%S GMT\",", &tmv); }
+      if (now > 1700000000) { struct tm tmv; gmtime_r(&now, &tmv); snprintf(ts, sizeof(ts), "\"time\":\"%04d-%02d-%02d %02d:%02d:%02d GMT\",", tmv.tm_year + 1900, tmv.tm_mon + 1, tmv.tm_mday, tmv.tm_hour, tmv.tm_min, tmv.tm_sec); }
       snprintf(json, sizeof(json), "{\"stat\":{%s\"rxnb\":%lu,\"rxok\":%lu,\"rxfw\":%lu,\"ackr\":100.0,\"dwnb\":0,\"txnb\":0}}", ts, (unsigned long)rxnb, (unsigned long)rxok, (unsigned long)rxfw);
       sendPacket(0x00, json);
       Serial.printf("[%lus] wifi=%d ip=%s rxnb=%lu rxok=%lu\n", millis() / 1000, WiFi.status() == WL_CONNECTED, WiFi.localIP().toString().c_str(), (unsigned long)rxnb, (unsigned long)rxok);
     }
-    int n = udp.parsePacket(); if (n > 0) { uint8_t tmp[64]; udp.read(tmp, min(n, 64)); }      // drop PUSH_ACK / PULL_ACK
+    int n = udp.parsePacket(); if (n > 0) { uint8_t tmp[64]; int r = udp.read(tmp, min(n, 64)); if (r >= 4 && (tmp[3] == 0x01 || tmp[3] == 0x04)) lastAckMs = millis(); }   // PUSH_ACK / PULL_ACK = bridge alive
   }
+  if (millis() - lastDraw > 1000) { lastDraw = millis(); drawStatus(); }
   delay(1);
 }
