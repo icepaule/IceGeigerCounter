@@ -33,6 +33,24 @@ views:
             green: 0
             yellow: 30
             red: 45
+      - type: conditional
+        conditions:
+          - condition: state
+            entity: sensor.icegeiger_usvh
+            state_not: unavailable
+          - condition: state
+            entity: sensor.icegeiger_usvh
+            state_not: unknown
+        card:
+          type: gauge
+          entity: sensor.icegeiger_usvh
+          name: µSv/h
+          min: 0
+          max: 0.4
+          severity:
+            green: 0
+            yellow: 0.2
+            red: 0.3
       - type: history-graph
         title: CPM und Dosisleistung (24 h)
         hours_to_show: 24
