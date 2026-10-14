@@ -18,9 +18,10 @@
 
 // Hardware profile: delivered HITT-Tracker V1.2 (SX1262 + UC6580).
 static const char DEVICE_ID[]="icegeiger-v2";
-static const int GC_INT_PIN=17;                 // GPIO47 is Boot_Mode on Heltec V1.1-family
+static const int GC_INT_PIN=7;                  // real wiring (20.10.2026): wired to GPIO7, not GPIO17 as first planned;
+                                                 // moved SD_CS off GPIO7 below to avoid a pin clash (SD stays unused for now anyway)
 static const int VBAT_PIN=1;
-static const int SD_SCK=4, SD_MISO=5, SD_MOSI=6, SD_CS=7;
+static const int SD_SCK=4, SD_MISO=5, SD_MOSI=6, SD_CS=15;   // was 7 - freed up for GC_INT_PIN, GPIO15 is otherwise unused (U0RTS/XTAL_32K_P, not wired)
 #ifdef ICEGEIGER_LORA_TEST_INTERVAL_MS     // test builds only: shorter uplink interval (stay below 1 % duty cycle)
 static const uint32_t LOG_MS=10000, LORA_MOBILE_MS=ICEGEIGER_LORA_TEST_INTERVAL_MS, LORA_HOME_MS=ICEGEIGER_LORA_TEST_INTERVAL_MS;
 #else
@@ -43,6 +44,7 @@ bool overTheAirActivation=true, loraWanAdr=true, isTxConfirmed=false;
 uint8_t appPort=2, confirmedNbTrials=1;
 uint32_t appTxDutyCycle=LORA_MOBILE_MS;   // required by Heltec LoRaWan_APP (extern in LoRaWan_APP.h)
 bool loraEnabled=false;                     // only transmit once an AppKey is provisioned (never TX with all-zero keys / possibly no antenna)
+uint32_t lastTxMillis=0;                    // quiet window: radio IRQ handling continues briefly after LoRaWAN.send() returns (RX1/RX2), not just during SEND/CYCLE
 
 // ---- On-board TFT status screen (Heltec Wireless Tracker: CS38 RST39 DC40 SCLK41 MOSI42, backlight GPIO21, power GPIO3) ----
 HT_st7735 tft; uint16_t lastCounts=0; uint32_t lastDraw=0;
@@ -52,7 +54,7 @@ static void drawStatus(){
   snprintf(l,sizeof(l),"CPM %lu %.2fuSv/h",(unsigned long)cpm,cpm/CPM_PER_USVH); tftRow(0,ST7735_WHITE,l);
   snprintf(l,sizeof(l),"10s:%u tot:%lu",(unsigned)lastCounts,(unsigned long)pulseTotal); tftRow(1,ST7735_CYAN,l);
   snprintf(l,sizeof(l),fix?"GPS FIX %usat H%.1f":"GPS no fix %usat",(unsigned)(gps.satellites.isValid()?gps.satellites.value():0),gps.hdop.isValid()?gps.hdop.hdop():0.0); tftRow(2,fix?ST7735_GREEN:ST7735_YELLOW,l);
-  if(fix) snprintf(l,sizeof(l),"%.4f %.4f",gps.location.lat(),gps.location.lng()); else snprintf(l,sizeof(l),"nmea chars:%lu",(unsigned long)gps.charsProcessed());
+  if(fix) snprintf(l,sizeof(l),"%.4f %.4f",gps.location.lat(),gps.location.lng()); else snprintf(l,sizeof(l),"nmea ok:%lu bad:%lu",(unsigned long)gps.passedChecksum(),(unsigned long)gps.failedChecksum());
   tftRow(3,ST7735_WHITE,l);
   bool w=WiFi.status()==WL_CONNECTED, m=mqtt.connected();
   snprintf(l,sizeof(l),"WiFi:%s MQTT:%s",w?"ok":"--",m?"ok":"--"); tftRow(4,(w&&m)?ST7735_GREEN:ST7735_RED,l);
@@ -60,7 +62,7 @@ static void drawStatus(){
   snprintf(l,sizeof(l),"SD:%s LoRa:%s",sdOK?"ok":"--",lr); tftRow(5,ST7735_WHITE,l);
   snprintf(l,sizeof(l),"Bat %.2fV",readBatteryMv()/1000.0f); tftRow(6,ST7735_WHITE,l);
   snprintf(l,sizeof(l),"seq %lu up %lus",(unsigned long)seq,(unsigned long)(millis()/1000)); tftRow(7,ST7735_CYAN,l);
-  Serial.printf("[%lus] cpm60=%lu n10=%u tot=%lu gps_fix=%d sats=%u nmea=%lu wifi=%d mqtt=%d sd=%d lora=%s bat=%umV\n",(unsigned long)(millis()/1000),(unsigned long)cpm,(unsigned)lastCounts,(unsigned long)pulseTotal,(int)fix,(unsigned)(gps.satellites.isValid()?gps.satellites.value():0),(unsigned long)gps.charsProcessed(),(int)w,(int)m,(int)sdOK,lr,(unsigned)readBatteryMv());
+  Serial.printf("[%lus] cpm60=%lu n10=%u tot=%lu gps_fix=%d sats=%u chars=%lu ok=%lu bad=%lu wifi=%d mqtt=%d sd=%d lora=%s bat=%umV\n",(unsigned long)(millis()/1000),(unsigned long)cpm,(unsigned)lastCounts,(unsigned long)pulseTotal,(int)fix,(unsigned)(gps.satellites.isValid()?gps.satellites.value():0),(unsigned long)gps.charsProcessed(),(unsigned long)gps.passedChecksum(),(unsigned long)gps.failedChecksum(),(int)w,(int)m,(int)sdOK,lr,(unsigned)readBatteryMv());
 }
 
 void IRAM_ATTR tubeImpulse(){ pulseTotal++; }
@@ -118,7 +120,7 @@ void serviceLoRa(){
   switch(deviceState){
     case DEVICE_STATE_INIT: LoRaWAN.init(loraWanClass,loraWanRegion); LoRaWAN.setDefaultDR(3); break;
     case DEVICE_STATE_JOIN: LoRaWAN.join(); break;
-    case DEVICE_STATE_SEND: prepareTxFrame(appPort); LoRaWAN.send(); deviceState=DEVICE_STATE_CYCLE; break;
+    case DEVICE_STATE_SEND: lastTxMillis=millis(); prepareTxFrame(appPort); LoRaWAN.send(); deviceState=DEVICE_STATE_CYCLE; break;
     case DEVICE_STATE_CYCLE: interval=(WiFi.status()==WL_CONNECTED)?LORA_HOME_MS:LORA_MOBILE_MS; LoRaWAN.cycle(interval); deviceState=DEVICE_STATE_SLEEP; break;
     case DEVICE_STATE_SLEEP: Mcu.timerhandler(); Radio.IrqProcess(); delay(1); break;
     default: deviceState=DEVICE_STATE_INIT; break;
@@ -130,12 +132,21 @@ void setup(){
   pinMode(VBAT_PIN,INPUT);
   tft.st7735_init(); tft.st7735_fill_screen(ST7735_BLACK); tftRow(0,ST7735_WHITE,"IceGeiger V2 boot");   // TFT init also sets GPIO3 (shared Vext) HIGH
   Serial1.begin(115200,SERIAL_8N1,33,34); pinMode(3,OUTPUT); digitalWrite(3,HIGH);
+#ifdef ICEGEIGER_ENABLE_SD   // SD card not wired up yet; its SPI (HSPI) would also be touched by the TFT driver, so stay off until it's actually needed
   sdSpi.begin(SD_SCK,SD_MISO,SD_MOSI,SD_CS); sdOK=SD.begin(SD_CS,sdSpi,8000000); if(sdOK&&!SD.exists("/icegeiger"))SD.mkdir("/icegeiger");
-  copyLoRaSecrets(); 
+#endif
+  copyLoRaSecrets();
+#ifdef ICEGEIGER_ENABLE_LORA   // kept disabled by default: the Heltec LoRaWan_APP library crashes the
+                               // radio's own interrupt handling during transmit (Interrupt WDT panic,
+                               // reproduced on 20.10.2026 with TFT redraw fully disabled too, so it is
+                               // not our drawStatus()/SPI code - the bug is inside the vendor library).
+                               // WiFi/MQTT/Home Assistant is the confirmed-stable primary data path;
+                               // revisit LoRa once a real multi-channel OTAA gateway is in use.
 #if ICEGEIGER_LORAWAN_ABP
   loraEnabled=(devAddr!=0);
 #else
   for(uint8_t i=0;i<16;i++) if(appKey[i]) loraEnabled=true;
+#endif
 #endif
   Mcu.begin(HELTEC_BOARD,SLOW_CLK_TPYE); ensureWifi();
 }
@@ -144,6 +155,13 @@ void loop(){
   if(millis()-lastLog>=LOG_MS){ lastLog+=LOG_MS; uint32_t now=pulseTotal; uint16_t counts=(uint16_t)min(now-lastPulseTotal,65535UL); lastPulseTotal=now; buckets[bucketPos]=counts; lastCounts=counts; bucketPos=(bucketPos+1)%6; seq++;
     String j=measurementJson(counts,cpm60()); appendLog(j); if(mqtt.connected()){ String t=String("icegeiger/")+DEVICE_ID+"/live"; mqtt.publish(t,j,false,1); backfill(); }
   }
-  if(millis()-lastDraw>=1000){ lastDraw=millis(); drawStatus(); }
+  // TFT refresh is a slow byte-polled SPI write (no DMA/IRQ); it blocks the CPU long enough to
+  // starve the LoRa radio's own interrupt servicing, causing an Interrupt WDT panic. Confirmed via
+  // addr2line: loop->drawStatus->...->spiTransferByte (20.10.2026). A guard limited to the SEND/CYCLE
+  // window plus a few seconds after TX still crashed, so the radio evidently needs prompt servicing
+  // at unpredictable times even in DEVICE_STATE_SLEEP, not only right around a transmit. Simplest
+  // reliable fix: stop the periodic TFT redraw entirely while LoRaWAN is active (telemetry stays live
+  // via MQTT/Home Assistant and Serial either way); it still shows the static boot screen.
+  if(!loraEnabled && millis()-lastDraw>=3000){ lastDraw=millis(); drawStatus(); }
   delay(1);
 }

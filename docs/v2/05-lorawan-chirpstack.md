@@ -175,3 +175,13 @@ Das Testintervall von 60 s entspricht bei diesem Payload (34 Byte, SF9) etwa 0,4
 - Die Bridge übernimmt die Werte, die Home-Assistant-Entities aktualisieren sich.
 
 Nicht getestet: OTAA-Join, Multi-Channel-Empfang, Downlinks, Reichweite.
+
+### 10.5 Absturz beim Senden (20.10.2026) – LoRa vorerst deaktiviert
+
+Beim weiteren Testen stürzte der Tracker beim Senden reproduzierbar ab (`Guru Meditation Error: ... panic'ed (Interrupt wdt timeout ...)`). Diagnose mit `addr2line` gegen die geflashte ELF-Datei:
+
+1. Erster Verdacht: Die TFT-Statusanzeige (jede Sekunde ein komplettes Bildschirm-Update über eine blockierende, byte-weise abgefragte SPI-Übertragung, `HT_st7735::st7735_write_str → ... → spiTransferByte`) blockiert den Prozessor lange genug, um die Funkchip-Interrupt-Bedienung während des Sendens zu verhungern.
+2. Gegenmaßnahmen in drei Stufen getestet: (a) Redraw nur alle 3 s und nie während `DEVICE_STATE_SEND`/`CYCLE` – Absturz trat seltener, aber weiterhin auf. (b) zusätzliches 4-Sekunden-Ruhefenster nach jedem Sendeversuch – Absturz trat weiterhin auf, diesmal ca. 20 s nach dem Senden, also außerhalb des Ruhefensters. (c) TFT-Redraw während aktivem LoRaWAN **komplett** deaktiviert – Absturz trat weiterhin exakt beim Senden auf.
+3. Schritt (c) widerlegt die TFT-Theorie endgültig: Der Fehler liegt nicht in `drawStatus()`/unserem SPI-Code, sondern **innerhalb der Heltec-`LoRaWan_APP`-Bibliothek selbst** (vermutlich deren eigene Debug-Ausgaben oder Funk-IRQ-Behandlung während des Sendevorgangs).
+
+**Entscheidung:** LoRa bleibt bis auf Weiteres deaktiviert (`#ifdef ICEGEIGER_ENABLE_LORA`, aus). WLAN/MQTT/Home Assistant ist der bestätigt stabile Hauptpfad; der hier beschriebene Testaufbau (Einkanal-Gateway, ABP) war ohnehin nur für einen ersten Funktionsnachweis gedacht, nicht für den Produktivbetrieb. Beim Produktiveinsatz mit echtem Multi-Channel-Gateway und OTAA sollte zuerst geprüft werden, ob eine neuere Version der Heltec-Bibliothek das Problem behebt.

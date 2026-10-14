@@ -28,10 +28,14 @@ Nur lokal setzen: WLAN, MQTT, DevEUI, JoinEUI, AppKey. `secrets.h` wird nicht ei
 
 ## Aktuelle Pinbelegung
 
-- GC-1602 INT: **GPIO17** über 10k/20k-Pegelteiler
-- microSD: SCK=4, MISO=5, MOSI=6, CS=7
+- GC-1602 INT: **GPIO7**, ein 150-kΩ-Vorwiderstand, **kein** Pfad nach GND (Begründung: [02-electrical-wiring.md](02-electrical-wiring.md))
+- microSD: SCK=4, MISO=5, MOSI=6, CS=**15** (deaktiviert per `#ifdef ICEGEIGER_ENABLE_SD`, solange keine Karte verbaut ist)
 - GNSS: RX=33, TX=34, Versorgung über GPIO3 HIGH
 - VBAT read: GPIO1, Skalierung 4.9 laut Heltec-Dokumentation
+
+## LoRaWAN: standardmäßig deaktiviert
+
+Die Heltec-LoRaWan_APP-Bibliothek stürzt beim Senden reproduzierbar mit einem Interrupt-Watchdog-Panic ab (Core-1-ISR, nicht unsere drawStatus()/SPI-Logik – per `addr2line` verifiziert und auch bei komplett abgeschaltetem TFT-Refresh weiterhin reproduzierbar, siehe [05-lorawan-chirpstack.md](05-lorawan-chirpstack.md) Abschnitt 10.5). LoRa ist deshalb standardmäßig per `#ifdef ICEGEIGER_ENABLE_LORA` abgeschaltet; WLAN/MQTT ist der bestätigt stabile Hauptpfad. Zum Testen wieder aktivieren (nur mit Monitoring, Absturzrisiko bekannt).
 
 ## Betriebslogik
 

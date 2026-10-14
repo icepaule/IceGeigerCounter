@@ -15,10 +15,10 @@
 
 ## Test 2 – Pulszählung
 
-- [ ] GC-1602 zählt lokal
-- [ ] ESP32 zählt fallende Flanken auf GPIO17
-- [ ] über 10 Minuten vergleichbare Gesamtimpulszahl
-- [ ] keine massiven Doppelzählungen
+- [x] GC-1602 zählt lokal (LCD zeigt CPM, 20.10.2026)
+- [x] ESP32 zählt fallende Flanken auf **GPIO7** (nicht GPIO17, siehe [02-electrical-wiring.md](02-electrical-wiring.md)), Impulszahl `tot` steigt über 115 s stabil mit (20.10.2026)
+- [ ] über 10 Minuten vergleichbare Gesamtimpulszahl (bisher nur kurze Testläufe, kein direkter 10-min-Vergleich mit Piezo-Klicks)
+- [ ] keine massiven Doppelzählungen (noch nicht gezielt geprüft)
 
 ## Test 3 – SD
 
@@ -66,6 +66,7 @@ Im Freien und danach im geschlossenen Gehäuse:
 - [ ] InfluxDB erhält Punkt mit korrekter Position
 - [ ] SMA/U.FL-Verbindung mechanisch spannungsfrei
 - [ ] Reichweitentest bei geschlossenem Gehäuse
+- [x] **20.10.2026: LoRa-Sendung stürzt reproduzierbar ab** (Interrupt-WDT-Panic in der Heltec-Bibliothek, nicht in eigenem Code – siehe [05](05-lorawan-chirpstack.md) Abschnitt 10.5). LoRa ist bis auf Weiteres per `#ifdef ICEGEIGER_ENABLE_LORA` deaktiviert, WLAN/MQTT ist der bestätigt stabile Pfad.
 
 ## Test 8 – Laufzeit / Shield-Eignung
 

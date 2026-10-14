@@ -14,15 +14,22 @@ Wichtige belegte Pins der V1.1-Familie:
 
 ## GC-1602-INT an ESP32
 
-Für die reale Tracker-Familie wird **GPIO17** verwendet.
+> **Stand 20.10.2026, real umgesetzt und verifiziert – weicht von der ursprünglichen Planung ab.** Zunächst war GPIO17 mit einem klassischen Spannungsteiler (10 kΩ/20 kΩ) vorgesehen. Real verdrahtet wurde **GPIO7**, und der Teiler musste komplett entfallen. Grund und Herleitung unten.
 
-- GC-1602 `INT` → **10 kΩ** → ESP32 **GPIO17**
-- GPIO17 → **20 kΩ** → GND
-- GC-1602 `GND` → Tracker `GND`
+**Finale Verdrahtung:**
 
-Bei 5 V Eingang liefert der ideale Teiler etwa 3,33 V. Vor Anschluss den realen INT-Pegel des gelieferten GC-1602 messen. Gezählt wird auf der **fallenden Flanke**.
+- GC-1602 `INT` (Header P3) → **ein** Widerstand **150 kΩ** in Reihe → ESP32 **GPIO7**
+- **Kein** zweiter Widerstand nach GND (kein Spannungsteiler!)
+- GC-1602 `GND` (P3) → Tracker `GND`
+- `5V` an P3 bleibt unbeschaltet
 
-Gemessen (19.09.2026, Nano-Pin D2 gegen GND, USB-Versorgung über den Nano): Ruhepegel **4,39 V**. Der Teiler liefert dann ca. 2,93 V am GPIO (ESP32-S3: High ab etwa 2,5 V, maximal 3,6 V). Bei 5,0 V Schienenspannung sind es 3,33 V, bei 5,25 V ca. 3,5 V. Der Pegel folgt der Versorgung; deshalb nach dem Umstieg auf das Battery Shield erneut messen.
+Gezählt wird weiterhin auf der **fallenden Flanke**.
+
+**Warum kein Spannungsteiler:** Der INT-Ausgang des GC-1602 treibt das Signal nur sehr schwach (vermutlich nur ein hochohmiger Pull-up auf der Platine, kein aktiver Logiktreiber). Ruhepegel gemessen: **4,39 V** (Nano-Pin D2 gegen GND, 19.09.2026). Ein klassischer Teiler mit 10 kΩ/20 kΩ (30 kΩ Gesamtlast) hat den Pegel so weit einbrechen lassen, dass selbst der eingebaute Nano keine sauberen Flanken mehr erkannte (LCD zeigte 0 CPM). Auch 150 kΩ + 150 kΩ (300 kΩ Last) reichte noch nicht. Erst ein **einzelner Widerstand ohne Pfad nach GND** (nur `INT` → 150 kΩ → GPIO7) ließ die Last auf wenige µA sinken – die interne ESD-/Klemmdiode des ESP32-S3 begrenzt dabei die Spannung an GPIO7 passiv auf ca. 3,6–3,9 V, der Reststrom liegt bei (4,4 V − 3,6 V) / 150 kΩ ≈ 5 µA. Diese Methode (Vorwiderstand + interne Klemmdiode statt Spannungsteiler) ist Standard für genau diesen Fall: ein sehr schwacher Quellenausgang, der keine zusätzliche Last verträgt.
+
+**Warum GPIO7 statt GPIO17:** Reine Verwechslung beim Verdrahten (Platinenbeschriftung "7" statt "17" an Header J3 missverstanden). Da GPIO7 in der Firmware ursprünglich als `SD_CS` für die (ohnehin unbenutzte) microSD-Karte reserviert war, wurde `SD_CS` in der Firmware auf **GPIO15** verschoben, um den Pinkonflikt zu vermeiden (siehe [microSD](#microsd) unten). GPIO17 selbst ist dadurch frei und könnte bei Bedarf künftig anders genutzt werden.
+
+**Ausführliche Herleitung inkl. aller Messwerte:** [08a-phase-d-int-schnittstelle.md](08a-phase-d-int-schnittstelle.md).
 
 ## microSD
 
@@ -31,11 +38,11 @@ Gemessen (19.09.2026, Nano-Pin D2 gegen GND, USB-Versorgung über den Nano): Ruh
 | CLK | GPIO4 |
 | MISO | GPIO5 |
 | MOSI | GPIO6 |
-| CS | GPIO7 |
+| CS | GPIO15 |
 | VCC | 3V3 |
 | GND | GND |
 
-GPIO4–7 sind im dokumentierten Tracker-Pinout frei von LoRa/TFT. Leitungen kurz halten.
+GPIO4, 5, 6 und 15 sind im dokumentierten Tracker-Pinout frei von LoRa/TFT/GNSS. `CS` wurde von GPIO7 auf GPIO15 verschoben, weil GPIO7 jetzt vom GC-1602-INT belegt ist (siehe oben). Die SD-Karte ist in der Firmware zusätzlich per `#ifdef ICEGEIGER_ENABLE_SD` komplett abgeschaltet, solange keine Karte angeschlossen ist – ihr SPI-Bus (HSPI) würde sich sonst mit dem des TFT-Displays überschneiden. Leitungen kurz halten.
 
 ## GNSS
 

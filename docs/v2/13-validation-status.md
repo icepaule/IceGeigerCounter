@@ -36,6 +36,15 @@ Hinweis: Die Röhre im GC-1602-NANO ist laut Upstream-Beschreibung eine J305. De
 
 Offen in diesem Bereich: OTAA-Join mit einem echten Multi-Channel-Gateway, Reichweite, SD-Karte zusammen mit dem Display (beide nutzen HSPI), Akkumessung (Anzeige 0 mV ohne Akku, Skalierung ungeprüft).
 
+## Real verifiziert – GC-INT-Verdrahtung korrigiert, Firmware stabilisiert (20.10.2026)
+
+- [x] **Verdrahtungsfehler gefunden und behoben:** GC-1602-INT war an GPIO7 statt dem geplanten GPIO17 angeschlossen (Platinenbeschriftung verwechselt). `SD_CS` in der Firmware von GPIO7 auf GPIO15 verlegt, um den Pinkonflikt zu lösen.
+- [x] **Spannungsteiler durch Vorwiderstand ersetzt:** Der INT-Ausgang des GC-1602 ist zu hochohmig/schwach, um einen Spannungsteiler (getestet: 10k/20k und 150k/150k+150k, also 30 kΩ und 300 kΩ Last) zu verkraften – in beiden Fällen brach die Zählung auch beim Nano selbst ein. Lösung: ein einzelner 150-kΩ-Vorwiderstand ohne Pfad nach GND, Spannungsbegrenzung übernimmt die interne ESD-Klemmdiode des ESP32-S3 (Reststrom ca. 5 µA). Details: [02-electrical-wiring.md](02-electrical-wiring.md), [08a](08a-phase-d-int-schnittstelle.md).
+- [x] **Echte GC-Impulse am Tracker verifiziert:** `tot` steigt im Betrieb kontinuierlich mit, passend zur Hintergrundstrahlung.
+- [x] **NMEA-Checksummen-Diagnose ergänzt:** `gps.passedChecksum()`/`failedChecksum()` zeigen im Testlauf ein gesundes Verhältnis (z. B. 2217 ok zu 7 bad über 115 s) – die UART-Verbindung zum GNSS-Modul und das Parsing sind also in Ordnung. `satellites=0` bleibt trotzdem bestehen (noch kein Fix); das Feld ist dafür ohnehin nicht aussagekräftig, da es erst mit einem Fix aus dem GGA-Satz befüllt wird. Externe GNSS-Antenne wurde angeschlossen, Test bisher nur kurz (unter einer Minute am Stück wegen des damaligen LoRa-Absturz-Loops).
+- [x] **LoRa-Absturz gefunden und isoliert** (siehe [05](05-lorawan-chirpstack.md) Abschnitt 10.5) – Ursache in der Heltec-Bibliothek, nicht in eigenem Code. LoRa deaktiviert, dadurch **115 s Dauertest ohne jeden Absturz**, saubere Impulszählung, GNSS-UART weiterhin gesund.
+- [ ] **Offen:** echter GNSS-Fix (jetzt, da LoRa nicht mehr alle ~60 s einen Neustart auslöst, sollte ein längerer Test ohne Unterbrechung möglich sein – das war vorher nie der Fall).
+
 ## Aus Hersteller-/Projektunterlagen plausibilisiert
 
 - [x] Heltec-V1.1-Familie: ESP32-S3FN8 + SX1262 + UC6580

@@ -1,6 +1,8 @@
 # V2 – Phase D: INT-Schnittstelle Schritt für Schritt
 
-Ziel: Den Impulsausgang (`INT`) des GC-1602-NANO sicher an **GPIO17** des HITT-Trackers anschließen und die Zählung gegen die Klicks des Piezos prüfen. Dies ist die ausführliche Fassung von Phase D aus [08-assembly.md](08-assembly.md).
+> **Nachtrag 20.10.2026 – final real umgesetzt auf GPIO7, nicht GPIO17, und ohne Spannungsteiler.** Diese Seite beschreibt den ursprünglich geplanten Aufbau (10 kΩ/20 kΩ-Teiler auf GPIO17) und ist als Lernpfad/Herleitung erhalten geblieben. Real verdrahtet wurde am Ende: **ein einzelner 150-kΩ-Widerstand** zwischen `INT` und **GPIO7**, **kein** zweiter Widerstand nach GND. Grund: Der INT-Ausgang ist zu schwach, jeder Spannungsteiler (auch 150 kΩ/300 kΩ) ließ die Zählung sowohl beim Nano als auch am Tracker auf 0 einbrechen. Erst ganz ohne Pfad nach GND (Schutz übernimmt die interne ESD-Klemmdiode des ESP32) funktionierte beides zuverlässig. Die aktuelle, verbindliche Fassung steht in [02-electrical-wiring.md](02-electrical-wiring.md). Schritte 1 (Entladen/Warten) und das Sicherheitskonzept unten gelten unverändert.
+
+Ziel: Den Impulsausgang (`INT`) des GC-1602-NANO sicher an den HITT-Tracker anschließen und die Zählung gegen die Klicks des Piezos prüfen. Dies ist die ausführliche Fassung von Phase D aus [08-assembly.md](08-assembly.md).
 
 > **Sicherheit:** Das GC-1602 erzeugt für die Röhre mehrere hundert Volt. Nach dem Ausschalten wird **gewartet und entladen**, bevor gearbeitet wird. Erden ist nicht die Schutzmaßnahme. Die vollständigen Regeln stehen in [07-safety-and-radiation-basics.md](../07-safety-and-radiation-basics.md), Abschnitt A1.
 > Der ESP32-S3 verträgt an GPIO-Pins **maximal 3,6 V**. `INT` darf nie direkt an den Tracker.
