@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import os,json,base64,struct,datetime
+import os,json,base64,struct,datetime,time
 import paho.mqtt.client as mqtt
 try:
  from influxdb_client import InfluxDBClient,Point,WritePrecision
@@ -85,5 +85,15 @@ def main():
   influx=InfluxDBClient(url=IU,token=IT,org=IO);write_api=influx.write_api()
  c=mqtt.Client(mqtt.CallbackAPIVersion.VERSION2,client_id='icegeiger-bridge');
  if USER:c.username_pw_set(USER,PASSWORD)
- c.on_connect=on_connect;c.on_message=on_message;c.connect(HOST,PORT,60);c.loop_forever()
+ c.on_connect=on_connect;c.on_message=on_message
+ # 22.10.2026: broker can be briefly unreachable at container start (network not fully up yet);
+ # connect() raised and crashed the whole process, leaving it in a restart loop that only a manual
+ # `docker compose restart` cleared. Retry with backoff instead of dying on the first attempt.
+ delay=1
+ while True:
+  try:
+   c.connect(HOST,PORT,60); break
+  except OSError as e:
+   print('bridge: mqtt connect failed, retrying in',delay,'s:',e,flush=True); time.sleep(delay); delay=min(delay*2,30)
+ c.loop_forever(retry_first_connection=True)
 if __name__=='__main__':main()

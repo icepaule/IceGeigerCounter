@@ -33,9 +33,9 @@ Nur lokal setzen: WLAN, MQTT, DevEUI, JoinEUI, AppKey. `secrets.h` wird nicht ei
 - GNSS: RX=33, TX=34, Versorgung über GPIO3 HIGH
 - VBAT read: GPIO1, Skalierung 4.9 laut Heltec-Dokumentation
 
-## LoRaWAN: standardmäßig deaktiviert
+## LoRaWAN: RadioLib statt Heltec LoRaWan_APP, standardmäßig aktiv
 
-Die Heltec-LoRaWan_APP-Bibliothek stürzt beim Senden reproduzierbar mit einem Interrupt-Watchdog-Panic ab (Core-1-ISR, nicht unsere drawStatus()/SPI-Logik – per `addr2line` verifiziert und auch bei komplett abgeschaltetem TFT-Refresh weiterhin reproduzierbar, siehe [05-lorawan-chirpstack.md](05-lorawan-chirpstack.md) Abschnitt 10.5). LoRa ist deshalb standardmäßig per `#ifdef ICEGEIGER_ENABLE_LORA` abgeschaltet; WLAN/MQTT ist der bestätigt stabile Hauptpfad. Zum Testen wieder aktivieren (nur mit Monitoring, Absturzrisiko bekannt).
+Die Heltec-LoRaWan_APP-Bibliothek stürzte beim Senden reproduzierbar mit einem Interrupt-Watchdog-Panic ab (Core-1-ISR, nicht unsere drawStatus()/SPI-Logik – per `addr2line` verifiziert und auch bei komplett abgeschaltetem TFT-Refresh weiterhin reproduzierbar, siehe [05-lorawan-chirpstack.md](05-lorawan-chirpstack.md) Abschnitt 10.5). Am 22.10.2026 durch [RadioLib](https://github.com/jgromes/RadioLib) ersetzt (eigene `LoRaWANNode`-Anbindung auf dem SX1262, eigenes Single-Channel-Band passend zum T-Beam-Testgateway) – seitdem per `ICEGEIGER_ENABLE_LORA` standardmäßig aktiv, über mehrere Minuten stabil ohne Absturz verifiziert. WLAN/MQTT bleibt der primäre Pfad; LoRa dient zusätzlich als Fallback, siehe [05-lorawan-chirpstack.md](05-lorawan-chirpstack.md) Abschnitt 10.6.
 
 ## Betriebslogik
 

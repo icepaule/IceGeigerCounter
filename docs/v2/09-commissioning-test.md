@@ -66,7 +66,8 @@ Im Freien und danach im geschlossenen Gehäuse:
 - [ ] InfluxDB erhält Punkt mit korrekter Position
 - [ ] SMA/U.FL-Verbindung mechanisch spannungsfrei
 - [ ] Reichweitentest bei geschlossenem Gehäuse
-- [x] **20.10.2026: LoRa-Sendung stürzt reproduzierbar ab** (Interrupt-WDT-Panic in der Heltec-Bibliothek, nicht in eigenem Code – siehe [05](05-lorawan-chirpstack.md) Abschnitt 10.5). LoRa ist bis auf Weiteres per `#ifdef ICEGEIGER_ENABLE_LORA` deaktiviert, WLAN/MQTT ist der bestätigt stabile Pfad.
+- [x] **20.10.2026: LoRa-Sendung stürzt reproduzierbar ab** (Interrupt-WDT-Panic in der Heltec-Bibliothek, nicht in eigenem Code – siehe [05](05-lorawan-chirpstack.md) Abschnitt 10.5). LoRa war bis auf Weiteres per `#ifdef ICEGEIGER_ENABLE_LORA` deaktiviert, WLAN/MQTT der bestätigt stabile Pfad.
+- [x] **22.10.2026: Heltec LoRaWan_APP durch RadioLib ersetzt, LoRa wieder aktiv** (siehe [05](05-lorawan-chirpstack.md) Abschnitt 10.6) – mehrere Minuten stabil, Uplinks beim ChirpStack-Testgateway MIC-validiert, dient jetzt als Fallback-Pfad neben WLAN/MQTT.
 
 ## Test 8 – Laufzeit / Shield-Eignung
 
